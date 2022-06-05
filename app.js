@@ -1,12 +1,31 @@
 /**
  * @param {import('probot').Probot} app
  */
-module.exports = (app) => {
-  app.log("Yay! The app was loaded!");
+const owner = "pavlovic-ivan";
+const repo = "ILGPU";
+const runners_workflow = "runners.yaml"
+const ref = "master";
 
-  app.on("issues.opened", async (context) => {
-    return context.octokit.issues.createComment(
-      context.issue({ body: "Hello, World!" })
-    );
+module.exports = (app) => {
+  app.on("workflow_job", async (context) => {
+    if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes('cuda')){
+      app.log.info(context);
+      var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
+      
+      if(action !== null){
+        context.octokit.actions.createWorkflowDispatch({
+          owner: owner,
+          repo: repo,
+          workflow_id: runners_workflow,
+          ref: ref,
+          inputs: {
+            action: action,
+            run_id: context.payload.workflow_job.run_id.toString(),
+            run_attempt: context.payload.workflow_job.run_attempt.toString(),
+            job_id: context.payload.workflow_job.id.toString()
+          }
+        }); 
+      }
+    }
   });
 };
