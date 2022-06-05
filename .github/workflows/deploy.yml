@@ -29,4 +29,4 @@ jobs:
             --trigger-http \
             --entry-point probotApp \
             --service-account=${{ secrets.SERVICE_ACCOUNT }} \
-            --set-secrets 'APP_ID=APP_ID:latest,PRIVATE_KEY=PRIVATE_KEY:latest,WEBHOOK_SECRET=WEBHOOK_SECRET:latest'`
+            --set-secrets 'APP_ID=APP_ID:latest,PRIVATE_KEY=PRIVATE_KEY:latest,WEBHOOK_SECRET=WEBHOOK_SECRET:latest'
