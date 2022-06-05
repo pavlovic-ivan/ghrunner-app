@@ -23,7 +23,6 @@ jobs:
         uses: google-github-actions/setup-gcloud@v0
       - name: Deploy to GCF
         run: |
-          gcloud auth login
           yes | gcloud components install beta
           gcloud beta functions deploy ghrunner-app-function \
             --runtime nodejs16 \
