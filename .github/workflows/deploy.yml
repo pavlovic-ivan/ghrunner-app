@@ -11,10 +11,14 @@ jobs:
     environment: protected
     steps:
       - uses: actions/checkout@v2
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
-        with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      - name: Build Image:GCP
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: gcp.json
+        run: |
+          cat > $GOOGLE_APPLICATION_CREDENTIALS << EOF
+          ${{ secrets.GCP_CREDENTIALS }}
+          EOF
+          trap "rm -f $GOOGLE_APPLICATION_CREDENTIALS" EXIT
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@main
       - name: Deploy to GCF
