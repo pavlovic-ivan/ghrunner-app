@@ -11,16 +11,16 @@ jobs:
     environment: protected
     steps:
       - uses: actions/checkout@v2
-      - name: Build Image:GCP
+      - name: Create auth file
         env:
           GOOGLE_APPLICATION_CREDENTIALS: gcp.json
         run: |
           cat > $GOOGLE_APPLICATION_CREDENTIALS << EOF
-          ${{ secrets.GCP_CREDENTIALS }}
+          ${{ secrets.SERVICE_ACCOUNT_KEY }}
           EOF
           trap "rm -f $GOOGLE_APPLICATION_CREDENTIALS" EXIT
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@main
+        uses: google-github-actions/setup-gcloud@v0
       - name: Deploy to GCF
         run: |
           gcloud beta functions deploy ghrunner-app-function \
