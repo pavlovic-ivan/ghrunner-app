@@ -3,13 +3,12 @@
  */
 const owner = "pavlovic-ivan";
 const repo = "ILGPU";
-const runners_workflow = "runners.yaml"
+const runners_workflow = "runners.yaml";
 const ref = "master";
 
 module.exports = (app) => {
   app.on("workflow_job", async (context) => {
     if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes('cuda')){
-      app.log.info(context);
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
       if(action !== null){
