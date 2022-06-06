@@ -1,6 +1,6 @@
 default_events:
-  - workflow_job
+  - actions
 
 default_permissions:
   metadata: read
-  workflow_job: write
+  actions: write
