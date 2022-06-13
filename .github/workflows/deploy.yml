@@ -32,6 +32,7 @@ jobs:
           gcloud beta functions deploy ghrunner-app-function \
             --runtime nodejs16 \
             --allow-unauthenticated \
+            --security-level=secure-optional \
             --trigger-http \
             --entry-point probotApp \
             --quiet \
