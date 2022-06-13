@@ -3,3 +3,4 @@ node_modules
 ghapp.pem
 .envrc
 ghrunner-app.json
+.gcloudignore
