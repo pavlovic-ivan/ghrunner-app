@@ -24,12 +24,12 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@v0
+      # yes | gcloud components install beta
       - name: Deploy to GCF
         run: |
-          yes | gcloud components install beta
-          gcloud beta functions deploy ghrunner-app-function \
+          gcloud functions deploy ghrunner-app-function \
             --runtime nodejs16 \
             --trigger-http \
             --entry-point probotApp \
@@ -37,6 +37,6 @@ jobs:
             --project ${{ secrets.PROJECT_ID }} \
             --service-account=${{ secrets.SERVICE_ACCOUNT }} \
             --set-secrets 'APP_ID=APP_ID:latest,PRIVATE_KEY=PRIVATE_KEY:latest,WEBHOOK_SECRET=WEBHOOK_SECRET:latest'
-          gcloud beta functions add-iam-policy-binding ghrunner-app-function \
+          gcloud functions add-iam-policy-binding ghrunner-app-function \
             --member="allUsers" \
             --role="roles/cloudfunctions.invoker"
