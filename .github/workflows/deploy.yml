@@ -30,4 +30,4 @@ jobs:
       #       --member="allUsers" \
       #       --role="roles/cloudfunctions.invoker"
       - name: Deploy to GCF
-        run: make deploy project=${{ secrets.PROJECT_ID }} service_account=${{ secrets.SERVICE_ACCOUNT }}
+        run: make deploy project=${{ secrets.PROJECT_ID }} service_account=${{ secrets.SERVICE_ACCOUNT }} name=ilgpu-fhrunner-app
