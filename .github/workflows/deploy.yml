@@ -16,18 +16,5 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
-      # - name: Deploy to GCF
-      #   run: |
-      #     gcloud beta functions deploy ghrunner-app-function \
-      #       --runtime nodejs16 \
-      #       --trigger-http \
-      #       --entry-point probotApp \
-      #       --quiet \
-      #       --project ${{ secrets.PROJECT_ID }} \
-      #       --service-account=${{ secrets.SERVICE_ACCOUNT }} \
-      #       --set-secrets 'APP_ID=APP_ID:latest,PRIVATE_KEY=PRIVATE_KEY:latest,WEBHOOK_SECRET=WEBHOOK_SECRET:latest'
-      #     gcloud beta functions add-iam-policy-binding ghrunner-app-function \
-      #       --member="allUsers" \
-      #       --role="roles/cloudfunctions.invoker"
       - name: Deploy to GCF
-        run: make deploy project=${{ secrets.PROJECT_ID }} service_account=${{ secrets.SERVICE_ACCOUNT }} name=ilgpu-fhrunner-app
+        run: make deploy project=${{ secrets.PROJECT_ID }} service_account=${{ secrets.SERVICE_ACCOUNT }}
