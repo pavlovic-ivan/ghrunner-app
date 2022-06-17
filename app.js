@@ -23,7 +23,7 @@ module.exports = (app) => {
             run_id: context.payload.workflow_job.run_id.toString(),
             run_attempt: context.payload.workflow_job.run_attempt.toString(),
             job_id: context.payload.workflow_job.id.toString(),
-            label: jobLabel
+            label: label
           }
         }); 
       }
