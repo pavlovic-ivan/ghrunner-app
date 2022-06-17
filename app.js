@@ -12,6 +12,7 @@ module.exports = (app) => {
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
       if(action !== null){
+        let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes('cuda'));
         context.octokit.actions.createWorkflowDispatch({
           owner: owner,
           repo: repo,
@@ -21,7 +22,8 @@ module.exports = (app) => {
             action: action,
             run_id: context.payload.workflow_job.run_id.toString(),
             run_attempt: context.payload.workflow_job.run_attempt.toString(),
-            job_id: context.payload.workflow_job.id.toString()
+            job_id: context.payload.workflow_job.id.toString(),
+            label: jobLabel
           }
         }); 
       }
