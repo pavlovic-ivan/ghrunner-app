@@ -11,3 +11,5 @@ WIP
 # Add secrets in GCP using Secrets Manager
 
 # Configure Github repo secrets
+
+# Set Github App webhook
