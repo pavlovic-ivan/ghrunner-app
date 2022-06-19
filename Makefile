@@ -17,4 +17,4 @@ deploy:
 		--role="roles/cloudfunctions.invoker"
 
 describe:
-	gcloud beta functions describe ${name}
+	gcloud beta functions describe ${name} --format=json | jq .httpsTrigger.url
