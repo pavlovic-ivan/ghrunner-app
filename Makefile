@@ -15,3 +15,6 @@ deploy:
 	gcloud beta functions add-iam-policy-binding ${name} \
 		--member="allUsers" \
 		--role="roles/cloudfunctions.invoker"
+
+describe:
+	gcloud beta functions describe ${name}

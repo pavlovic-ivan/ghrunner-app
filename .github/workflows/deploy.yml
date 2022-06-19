@@ -18,3 +18,5 @@ jobs:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
       - name: Deploy to GCF
         run: make deploy project=${{ secrets.PROJECT_ID }} service_account=${{ secrets.SERVICE_ACCOUNT }}
+      - name: Describe GCF
+        run: make describe
