@@ -84,7 +84,7 @@ Your environment is now all set up.
 
 # Set Github App webhook
 
-First deploy the function either manually as described in the [readme](./README.md), or by triggering the [deploy workflow](./.github/workflows/deploy.yml). After the deployment is done, check the HTTP trigger address and save it.
+First deploy the function either manually as described in the [readme](./README.md), or by triggering the [deploy workflow](./.github/workflows/deploy.yml). After the deployment is done, check the HTTP trigger address and save it. Trigger is visible in the output of workflow job **Describe GCF**.
 
 Go back to the configuration page of your Github Application:
 Your Profile > Settings > Developer settings > "Your App" > Edit.
