@@ -31,19 +31,21 @@ export PRIVATE_KEY=$(cat ghapp.pem)
 
 The app is continuously deployed to Google Cloud using the [`setup-gcloud` GitHub Action](https://github.com/google-github-actions/setup-gcloud). See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) for the deployment workflow.
 
-If you wish to be able to deploy the backend to GCF:
+If you wish to be able to deploy the backend to GCF manually:
 - install `gcloud` installed
 - install `make`
-- authorise to GCP with `gcloud login`.
-
-Create secrets 
-
- Then, make sure that you have also `make` installed, as there is a [Makefile](./Makefile) available for convenience. Append the following environment variables to `.envrc` file, and source it:
+- save the Github Application .pem file in the project root as `ghapp.pem`
+- save the Service Account key `.json` file in the project root as `ghrunner-app.json`
+- append new environment vars to `.envrc` file
 ```
 export GOOGLE_PROJECT=<your project id>
 export GOOGLE_REGION=<your desired region>
 export GOOGLE_ZONE=<your desired zone of the region>
 ``` 
+- authorise to GCP with `gcloud login`.
+
+Create secrets as described in [installation guide](./INSTALLATION_GUIDE.md).
+
 now run the following to deploy the Google Cloud Function:
 ```
 make deploy
