@@ -18,9 +18,9 @@ jobs:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
       - name: Deploy to GCF
         env:
-          OWNER: pavlovic-ivan
-          REPO: ILGPU
-          WORKFLOW_FILE_NAME: runners.yaml
-          BRANCH: master
-          JOB_FILTER: cuda
+          OWNER: ${{ secrets.OWNER }}
+          REPO: ${{ secrets.REPO }}
+          WORKFLOW_FILE_NAME: ${{ secrets.WORKFLOW_FILE_NAME }}
+          BRANCH: ${{ secrets.BRANCH }}
+          JOB_FILTER: ${{ secrets.JOB_FILTER }}
         run: make deploy project=${{ secrets.PROJECT_ID }} service_account=${{ secrets.SERVICE_ACCOUNT }}
