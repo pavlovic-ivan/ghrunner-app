@@ -1,21 +1,21 @@
 /**
  * @param {import('probot').Probot} app
  */
-const owner = "pavlovic-ivan";
-const repo = "ILGPU";
-const runners_workflow = "runners.yaml";
-const ref = "master";
+const repository = process.env.REPOSITORY.split('/');
+const runners_workflow = process.env.WORKFLOW_FILE_NAME;
+const ref = process.env.BRANCH;
+const jobFilter = process.env.JOB_FILTER;
 
 module.exports = (app) => {
   app.on("workflow_job", async (context) => {
-    if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes('cuda')){
+    if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes(jobFilter)){
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
       if(action !== null){
-        let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes('cuda'));
+        let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes(jobFilter));
         context.octokit.actions.createWorkflowDispatch({
-          owner: owner,
-          repo: repo,
+          owner: repository[0],
+          repo: repository[1],
           workflow_id: runners_workflow,
           ref: ref,
           inputs: {
