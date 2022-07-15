@@ -18,7 +18,8 @@ jobs:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
       - name: Deploy to GCF
         env:
-          REPOSITORY: ${{ github.repository }}
+          OWNER: pavlovic-ivan
+          REPO: ILGPU
           WORKFLOW_FILE_NAME: runners.yaml
           BRANCH: master
           JOB_FILTER: cuda

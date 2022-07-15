@@ -1,7 +1,8 @@
 /**
  * @param {import('probot').Probot} app
  */
-const repository = process.env.REPOSITORY.split('/');
+const owner = process.env.OWNER; 
+const repo = process.env.REPO;
 const runners_workflow = process.env.WORKFLOW_FILE_NAME;
 const ref = process.env.BRANCH;
 const jobFilter = process.env.JOB_FILTER;
@@ -14,8 +15,8 @@ module.exports = (app) => {
       if(action !== null){
         let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes(jobFilter));
         context.octokit.actions.createWorkflowDispatch({
-          owner: repository[0],
-          repo: repository[1],
+          owner: owner,
+          repo: repo,
           workflow_id: runners_workflow,
           ref: ref,
           inputs: {
