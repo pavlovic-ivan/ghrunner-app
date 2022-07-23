@@ -16,10 +16,7 @@ module.exports = (app) => {
       if(action !== null){
         // let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes(jobFilter));
         let job_name = context.payload.workflow_job.name;
-        var label = job_name
-          .substring(job_name.indexOf("(") + 1, job_name.lastIndexOf(")"))
-          .split(' ')
-          .join('');
+        var label = context.payload.workflow_job.labels.join(',');
 
         console.log(`Triggering Workflow Dispatch for job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${label}`);
         if(action === 'completed'){
