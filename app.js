@@ -22,6 +22,10 @@ module.exports = (app) => {
           .join('');
 
         console.log(`Triggering Workflow Dispatch for job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${label}`);
+        if(action === 'completed'){
+          console.log(`Job was running on: runner-id ${context.payload.workflow_job.runner_id}, runner-name: ${context.payload.workflow_job.runner_name}`);
+        }
+
         context.octokit.actions.createWorkflowDispatch({
           owner: owner,
           repo: repo,
