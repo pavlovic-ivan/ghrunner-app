@@ -13,7 +13,13 @@ module.exports = (app) => {
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
       if(action !== null){
-        let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes(jobFilter));
+        // let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes(jobFilter));
+        let job_name = context.payload.workflow_job.name;
+        var label = job_name
+          .substring(job_name.indexOf("(") + 1, job_name.lastIndexOf(")"))
+          .split(' ')
+          .join('');
+
         context.octokit.actions.createWorkflowDispatch({
           owner: owner,
           repo: repo,
