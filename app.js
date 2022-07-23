@@ -10,8 +10,8 @@ const jobFilter = process.env.JOB_FILTER;
 module.exports = (app) => {
   app.on("workflow_job", async (context) => {
     if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes(jobFilter)){
-      console.log(`Console Event by job: ${context.payload.job_id}`);
-      app.log.log(`App Event by job: ${context.payload.job_id}`);
+      console.log(`Console Event by job: ${context.payload.workflow_job.id}`);
+      app.log.info(`App Event by job: ${context.payload.job_id}`);
 
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
