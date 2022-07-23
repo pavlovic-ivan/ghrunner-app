@@ -10,9 +10,7 @@ const jobFilter = process.env.JOB_FILTER;
 module.exports = (app) => {
   app.on("workflow_job", async (context) => {
     if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes(jobFilter)){
-      console.log(`Console Event by job: ${context.payload.workflow_job.id}`);
-      app.log.info(`App Event by job: ${context.payload.job_id}`);
-
+      console.log(`Received event from job: ${context.payload.workflow_job.id}. Action: ${context.payload.action}. Name: ${context.payload.workflow_job.name}`);
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
       if(action !== null){
@@ -23,6 +21,7 @@ module.exports = (app) => {
           .split(' ')
           .join('');
 
+        console.log(`Triggering Workflow Dispatch for job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${label}`);
         context.octokit.actions.createWorkflowDispatch({
           owner: owner,
           repo: repo,
