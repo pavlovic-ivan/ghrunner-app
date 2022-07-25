@@ -14,7 +14,6 @@ module.exports = (app) => {
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
       if(action !== null){
-        // let label = context.payload.workflow_job.labels.find(jobLabel => jobLabel.includes(jobFilter));
         let job_name = context.payload.workflow_job.name;
         var label = context.payload.workflow_job.labels.join(',');
 
