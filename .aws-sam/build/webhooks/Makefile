@@ -37,4 +37,17 @@ deploy-aws: build-sam
 	githubWorkflowName="${WORKFLOW_FILE_NAME}" \
 	githubBranch="${BRANCH}" \
 	githubJobFilter="${JOB_FILTER}"' \
+
+deploy-test: build-sam
+	sam deploy --stack-name ghapp-stack \
+    --on-failure DELETE \
+    --s3-bucket parquetsharp-dev-sam-templates \
+    --tags map-migrated=d-server-01068mdjl5jze3 \
+    --no-confirm-changeset \
+    --parameter-overrides 'awsRole="arn:aws:iam::338683621076:role/GHRunnerFunctionRole" \
+    githubOwner="pavlovic-ivan" \
+    githubRepository="ghrunner-app-gcp" \
+    githubWorkflowName="Deploy" \
+    githubBranch="main" \
+    githubJobFilter="cuda"'
 	
