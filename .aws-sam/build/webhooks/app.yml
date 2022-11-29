@@ -1,6 +1,0 @@
-default_events:
-  - actions
-
-default_permissions:
-  metadata: read
-  actions: write
