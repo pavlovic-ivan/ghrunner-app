@@ -9,12 +9,7 @@ Information for the authentication
     AWS_SECRET_ACCESS_KEY : you can find this information inside the IAM Configuration 
     AWS_REGION : region for the auth 
 Function settings
-    LAMBDA_FUNCTION : this will be the name of your future function
-    AWS_ARN_ROLE : this will be the ARN of the Lambda's function role 
-Stack of the Lambda
-    AWS_STACK_NAME : this will be the name of the Lambda's function stack
-S3 Bucket arn
-    AWS_S3_BUCKET : this will be the S3 bucket where is stored the function 
+    AWS_ARN_ROLE : this will be the ARN of the Lambda's function role  
 Values for the environmental variables
     OWNER : the github owner  
     REPOSITORY : the repo name 
