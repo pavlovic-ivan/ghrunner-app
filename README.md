@@ -28,6 +28,11 @@ export PRIVATE_KEY=$(cat ghapp.pem)
 ```
 > If you didn't create a Github Application, read about it [here](./INSTALLATION_GUIDE.md). Also, when you download the Github Application private key, rename it to ghapp.pem in place in the project root.
 
+## AWS SAM setup
+
+[For more info](./aws_sam.md)
+
+
 ## Deployment
 
 The app is continuously deployed to Google Cloud using the [`setup-gcloud` GitHub Action](https://github.com/google-github-actions/setup-gcloud). See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) for the deployment workflow.
