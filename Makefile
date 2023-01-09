@@ -1,7 +1,6 @@
 SHELL:=/bin/bash
 name=ghrunner-app-function
 aws_function_name=ghrunner-app
-aws_stack_name=ghapp-stack
 aws_s3_bucket=parquetsharp-dev-sam-templates
 project=
 service_account=
@@ -24,17 +23,15 @@ build-sam:
 	sam build
 
 deploy-aws: build-sam
-	sam deploy --stack-name ${aws_stack_name} \
-	--on-failure DELETE \
-	--s3-bucket ${aws_s3_bucket} \
-	--tags map-migrated=d-server-01068mdjl5jze3 \
-	--no-confirm-changeset \
-	--parameter-overrides 'awsRole="${AWS_ARN_ROLE}" \
-	functionName="${aws_function_name}" \
-	secretId="${AWS_SECRET_ID}"
-	githubOwner="${OWNER}" \
-	githubRepository="${REPO}" \
-	githubWorkflowName="${WORKFLOW_FILE_NAME}" \
-	githubBranch="${BRANCH}" \
-	githubJobFilter="${JOB_FILTER}"' \
-	
+	sam deploy --stack-name ${name} \
+		--on-failure DELETE \
+		--s3-bucket ${aws_s3_bucket} \
+		--no-confirm-changeset \
+		--parameter-overrides 'awsRole="${AWS_ARN_ROLE}" \
+		functionName="${aws_function_name}" \
+		secretId="${AWS_SECRET_ID}"
+		githubOwner="${OWNER}" \
+		githubRepository="${REPO}" \
+		githubWorkflowName="${WORKFLOW_FILE_NAME}" \
+		githubBranch="${BRANCH}" \
+		githubJobFilter="${JOB_FILTER}"'

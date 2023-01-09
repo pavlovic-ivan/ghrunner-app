@@ -1,20 +1,19 @@
-# ghapp-deployer-aws
-<h1>
-Deployer of Probot app on AWS Lambda using AWS Sam
-</h1>
+# Github App Deployer AWS
+
+## About
+Deployer of Probot app on AWS Lambda using AWS SAM
 
 -------------
 
-<h2> How does it work? </h2>
+## How does it work?
 
+This repository uses a template.yml for the creation of the Lambda. Every env variable is set during the deploy of the Lambda. This Function has already configured the API-Trigger, so in order to attach the Function to your app just copy the API-Endpoint inside your webhook URL.
 
-This repository uses a template.yml for the creation of the Lambda. Every env variables is set during the deploy of the Lambda. This Function has already configured the API-Trigger, so in order to attach the Function to your app just copy the API-Endpoint inside your webhook URL.
-
-It requires <strong>APP_ID</strong>, <strong>PRIVATE_KEY</strong> and <strong>WEBHOOK_SECRET</strong>. This information can be retrieved from your github application settings.
+It requires **APP_ID**, **PRIVATE_KEY** and **WEBHOOK_SECRET**. This information can be retrieved from your github application settings.
 
 ----------
 
-<h2> Build and Deploy the function locally </h2>
+## Build and Deploy the function locally
 
 Build the function:
 
@@ -22,18 +21,14 @@ Build the function:
   sam build
 ```
 [Set up the env](./setup.md)
-<!--
-  AGGIUNGI A PREREQUISITO
-  Cambiare ruolo
--->
 
 Deploy the function:
 
 ```
-  sam deploy --stack-name NAME-OF-THE-STACK \
+sam deploy --stack-name NAME-OF-THE-STACK \
   --on-failure DELETE \
   --s3-bucket YOUR-S3-BUCKET \
-  #?? OPTIONAL --tags map-migrated=d-server-01068mdjl5jze3 ?? \
+  --tags "tag-key"="tag-value" \
   --no-confirm-changeset \
   --parameter-overrides 'awsRole="ROLE-FOR-THE-FUNCTION" \
   functionName="YOUR-LAMBDA-FUNCTION-NAME" \
@@ -43,7 +38,6 @@ Deploy the function:
   githubWorkflowName="NAME-OF-THE-WORKFLOW" \
   githubBranch="NAME-OF-THE-BRANCH" \
   githubJobFilter="NAME-OF-THE-FILTER"'
-
 ```
 
 Delete the stack:
@@ -53,6 +47,6 @@ Delete the stack:
 ```
 -------
 
-<h2> Update the code of your function </h2>
+## Update the code of your function
 
-Every time a pushed is done, the action automatically runs the "deploy.yml". In this way your Function will always be updated. 
+Every time a pushe is done, the action automatically runs the `deploy.yml`. This way your Function will always be updated. 
