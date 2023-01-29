@@ -27,11 +27,4 @@ deploy-aws: build-sam
 		--on-failure DELETE \
 		--s3-bucket ${aws_s3_bucket} \
 		--no-confirm-changeset \
-		--parameter-overrides 'awsRole="${AWS_ARN_ROLE}" \
-		functionName="${aws_function_name}" \
-		secretId="${AWS_SECRET_ID}"
-		githubOwner="${OWNER}" \
-		githubRepository="${REPO}" \
-		githubWorkflowName="${WORKFLOW_FILE_NAME}" \
-		githubBranch="${BRANCH}" \
-		githubJobFilter="${JOB_FILTER}"'
+		--parameter-overrides "awsRole=${AWS_ARN_ROLE} functionName=${aws_function_name} secretId=${AWS_SECRET_ID} githubOwner=${OWNER} githubRepository=${REPO} githubWorkflowName=${WORKFLOW_FILE_NAME} githubBranch=${BRANCH} githubJobFilter=${JOB_FILTER}"
