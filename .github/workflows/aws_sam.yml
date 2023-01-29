@@ -27,6 +27,7 @@ jobs:
         env:
           AWS_ARN_ROLE: ${{ secrets.AWS_ARN_ROLE }}
           AWS_SECRET_ID: ${{ secrets.AWS_SECRET_ID }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           OWNER: ${{ secrets.OWNER }}
           REPO: ${{ secrets.REPO }}
           WORKFLOW_FILE_NAME: ${{ secrets.WORKFLOW_FILE_NAME }}

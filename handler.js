@@ -14,21 +14,8 @@ function processEvent(event) {
 // Handler of the function 
 module.exports.webhooks = async (event) => {
     let client = new AWS.SecretsManager();
-    // Get the secrets and parse them as JSON 
-    let data = JSON.parse((await client.getSecretValue({ SecretId: process.env['AWS_SECRET_ID'] }).promise()).SecretString);
-    // Assign the value of the secrets to the env in order to create the Probot app
-    process.env['APP_ID'] = data["APP_ID"];
-    // TIP : the PRIVATE_KEY must be : ("---BEGIN-RSA--- ....") and not (---BEGIN-RSA--- ....) the ' " " ' are a MUST. 
-
-    // let prv_key = data["PRIVATE_KEY"];
-    // if (prv_key.indexOf('"') === -1) {
-    //     process.env['PRIVATE_KEY'] = "\"".concat(prv_key).concat("\"").replace(/\\n/g, '\n');
-    // } else {
-    //     process.env['PRIVATE_KEY'] = prv_key.replace(/\\n/g, '\n');
-    // }
-
-    process.env['PRIVATE_KEY'] = (await client.getSecretValue({ SecretId: 'test' }).promise()).SecretString;
-
-    process.env['WEBHOOK_SECRET'] = data["WEBHOOK_SECRET"];
+    process.env['APP_ID'] = (await client.getSecretValue({ SecretId: 'APP_ID' }).promise()).SecretString;
+    process.env['PRIVATE_KEY'] = (await client.getSecretValue({ SecretId: 'PRIVATE_KEY' }).promise()).SecretString;
+    process.env['WEBHOOK_SECRET'] = (await client.getSecretValue({ SecretId: 'WEBHOOK_SECRET' }).promise()).SecretString;
     return processEvent(event);
 }   
