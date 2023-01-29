@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 name=ghrunner-app-function
 aws_function_name=ghrunner-app
-aws_s3_bucket=parquetsharp-dev-sam-templates
+aws_s3_bucket=ilgpu-dev-sam-templates
 project=
 service_account=
 
