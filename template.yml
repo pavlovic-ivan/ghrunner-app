@@ -57,4 +57,4 @@ Resources:
           WORKFLOW_FILE_NAME: !Ref githubWorkflowName
           BRANCH: !Ref githubBranch
           JOB_FILTER: !Ref githubJobFilter
-          SECRET_ID : !Ref secretId
+          AWS_SECRET_ID : !Ref secretId
