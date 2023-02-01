@@ -14,8 +14,8 @@ function processEvent(event) {
 // Handler of the function 
 module.exports.webhooks = async (event) => {
     let client = new AWS.SecretsManager();
-    process.env['APP_ID'] = (await client.getSecretValue({ SecretId: 'APP_ID' }).promise()).SecretString;
-    process.env['PRIVATE_KEY'] = (await client.getSecretValue({ SecretId: 'PRIVATE_KEY' }).promise()).SecretString;
-    process.env['WEBHOOK_SECRET'] = (await client.getSecretValue({ SecretId: 'WEBHOOK_SECRET' }).promise()).SecretString;
+    process.env['APP_ID'] = (await client.getSecretValue({ SecretId: 'appId' }).promise()).SecretString;
+    process.env['PRIVATE_KEY'] = (await client.getSecretValue({ SecretId: 'privateKey' }).promise()).SecretString;
+    process.env['WEBHOOK_SECRET'] = (await client.getSecretValue({ SecretId: 'webhookSecret' }).promise()).SecretString;
     return processEvent(event);
 }   
