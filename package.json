@@ -11,6 +11,7 @@
   "license": "ISC",
   "repository": "github:probot/example-google-cloud-function",
   "dependencies": {
+    "@probot/adapter-aws-lambda-serverless": "^3.0.2",
     "probot": "^12.2.3"
   },
   "devDependencies": {

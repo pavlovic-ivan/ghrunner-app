@@ -4,3 +4,4 @@ ghapp.pem
 .envrc
 ghrunner-app.json
 .gcloudignore
+.aws-sam
