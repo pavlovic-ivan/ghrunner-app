@@ -96,12 +96,13 @@ Next create a new IAM user. Attach the policy created above to this user. Genera
 Next, create an IAM role. Choose trusted entity type AWS Service, and for common use cases set "Lambda". Attach policies:
  - SecretsManagerReadWrite
  - AWSLambdaBasicExecutionRole
+
 Save the role ARN, it will be needed for later.
 
 ## Create secrets
 There are 3 secrets that need to be created with Secrets Manager. So open Secrets Manager, and create:
 - name: appId, type: plaintext - set the id of the github app
-- name: privateKey, type: plaintext - set the ghapp.pem signature
+- name: privateKey, type: plaintext - set the `ghapp.pem` signature
 - name: wehbookSecret, type: plaintext - set the secret you will use for the github app webhook
 
 # Configure ghrunner-app repo
