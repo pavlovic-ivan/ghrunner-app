@@ -2,7 +2,7 @@ name: Deploy the lambda using AWS SAM
 on:
   push:
     branches:
-      - migrate-to-aws
+      - main
   workflow_dispatch:
 
 jobs:
