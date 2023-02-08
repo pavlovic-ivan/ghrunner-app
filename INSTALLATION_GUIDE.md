@@ -22,71 +22,103 @@ Now the app needs to be installed. To do that open the **Install App** page. Sel
 
 
 Now the app is configured and installed.
-# Create GCP Role for Service Account
+# Create AWS resources
+## Create S3 bucket
+This bucket is used to store AWS SAM templates. Bucket needs to be created in a specific region, choose the one you need. However, the bucket name needs to be unique globally, across all regions. Suggestion is to use this format:
 
-Go to https://console.cloud.google.com. From the project selector select your working project. Then from the menu of services select **IAM & Admin > Roles**. Hit the **+ CREATE ROLE** button. Give your Role a name and description. Then add the following permissions to it and hit **CREATE**:
 ```
-cloudfunctions.functions.create
-cloudfunctions.functions.get
-cloudfunctions.functions.getIamPolicy
-cloudfunctions.functions.setIamPolicy
-cloudfunctions.functions.sourceCodeGet
-cloudfunctions.functions.sourceCodeSet
-cloudfunctions.functions.update
-cloudfunctions.operations.get
-iam.serviceAccounts.actAs
-resourcemanager.projects.get
-secretmanager.versions.access
+<account>.<region>.sam-templates
 ```
-Your Role is now created and it will be needed to be assigned to the Service Account.
-# Create GCP Service Account
+Additionaly, close the bucket for public access, and optionaly necessary tags.
 
-To create the Service Account, go to **IAM & Admin > Service Accounts**. Hit the **+ CREATE SERVICE ACCOUNT** button. Give your Service Account name and ID. Hit **Create and Continue** which will lead you to step 2 which is **Grant this service account access to project**. This is where you will assing your Service Account needed roles. Assign Roles:
-- your custom role created above
-- role: Cloud Functions Invoker
+## Create IAM resources
+To make the application able to run properly, several IAM resources need to be created.
 
-Hit the button **DONE**.
-## Create key
-In the list of Service Accounts, select your service acount, and go to **KEYS**. Then hit the **ADD KEY > Create new key**. Choose **JSON** format of the key. Save the file on your filesystem you will need it for later.
+First create an IAM policy, but replace the placeholder in the json example, with a bucket ARN created above. Pay attention to the asterisk, don't remove it:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowAllS3ActionsOnGrOssSAMBucket",
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": "<s3_bucket_arn>*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": "arn:aws:apigateway:*::/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:DescribeStacks",
+                "cloudformation:ListStackResources",
+                "lambda:DeleteFunction",
+                "lambda:CreateFunction",
+                "lambda:GetFunction",
+                "lambda:GetFunctionCodeSigningConfig",
+                "lambda:ListTags",
+                "lambda:TagResource",
+                "lambda:UpdateFunctionCode",
+                "lambda:UpdateFunctionConfiguration",
+                "lambda:AddPermission"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "iam:PassedToService": "lambda.amazonaws.com"
+                }
+            }
+        }
+    ]
+}
+```
+Give the policy a name, and optionaly add tags.
 
-# Add secrets in GCP using Secrets Manager
+Next create a new IAM user. Attach the policy created above to this user. Generate a set of access keys for this user, these need to be stored as secrets in github.
 
-To add secrets go to **Security > Secret Manager**. Hit the **+ CREATE SECRET** button. In the next window create a secret with:
-- a name: `APP_ID`
-- secret value: the id of the app create above
-- leave the rest as default and hit **CREATE SECRET** button
+Next, create an IAM role. Choose trusted entity type AWS Service, and for common use cases set "Lambda". Attach policies:
+ - SecretsManagerReadWrite
+ - AWSLambdaBasicExecutionRole
+Save the role ARN, it will be needed for later.
 
-then, create a secret with:
-- a name: `PRIVATE_KEY`
-- secret value: the contents of the `ghapp.pem` file (you can `cat` the file)
-- leave the rest as default and hit **CREATE SECRET** button
+## Create secrets
+There are 3 secrets that need to be created with Secrets Manager. So open Secrets Manager, and create:
+- name: appId, type: plaintext - set the id of the github app
+- name: privateKey, type: plaintext - set the ghapp.pem signature
+- name: wehbookSecret, type: plaintext - set the secret you will use for the github app webhook
 
-then, create a secret with:
-- a name: `WEBHOOK_SECRET`
-- secret value: your desired webhook secret
-- leave the rest as default and hit **CREATE SECRET** button
+# Configure ghrunner-app repo
+Deployment workflow runs over an environment. So head to the repository settings, and create an environment called `protected`. Then create a selected branches protection rule and set the default branch as a rule (main/master). After that, add secrets:
+ - AWS_ACCESS_KEY_ID: `<aws access key id from user created above>`
+ - AWS_SECRET_ACCESS_KEY: `<aws secret access key from user created above>`
+ - AWS_REGION: `<aws region used to create resources above>`
+ - AWS_ARN_ROLE: `<arn of the role created above>`
+ - AWS_S3_BUCKET: `<only the name of the bucket created above, not an arn>`
+ - BRANCH: `<branch to checkout of the repo where the app is installed, and where runners deployment workflow resides>`
+ - JOB_FILTER: `<taken from the jobs labels, to filter for which jobs runner will be created>`
+ - OWNER: `<owner of the repo where the app is installed>`
+ - REPO: `<name of the repo where the app is installed>`
+ - WORKFLOW_FILE_NAME: `<the name of the workflow file that deploys the runners, like: runners.yaml>`
 
-# Configure Github repo secrets
-
-Go to this repository settings page. Create a **New environment** named `protected` and **Configure the environment**. Set the protection rule with **Deployment branches** set to the **Selected branches**. By default no rule is set, so select the **Add deployment branch rule**. In the **Branch name pattern** field enter **main** or **master**. Then bellow select **Add Secret** option. In the new window set:
-- Name: `PROJECT_ID`
-- Value: the id of your GCP project
-
-then add a new secret with:
-- Name: `SERVICE_ACCOUNT`
-- Value: the id of your GCP Service Account created earlier (id is in the format of an email address)
-
-then add a new secret with:
-- Name: `SERVICE_ACCOUNT_KEY`
-- Value: the contents of the service account key json file created earlier
-
-Your environment is now all set up.
-
-# Set Github App webhook
-
-First deploy the function either manually as described in the [readme](./README.md), or by triggering the [deploy workflow](./.github/workflows/deploy.yml). After the deployment is done, go to https://console.cloud.google.com. Open service **Google Cloud Functions**. From the list of functions select your function and then select tab **TRIGGER**. Copy the HTTP trigger URL.
-
-Go back to the configuration page of your Github Application:
-Your Profile > Settings > Developer settings > "Your App" > Edit.
-
-Scroll down to **Webhook** section. As the **Webhook URL** set the HTTP Trigger you saved earlier. As the Webhook secret enter the value of the `WEBHOOK_SECRET` you've created earlier.
+# Next and final steps
+1. Deploy the Lambda function
+2. After deployment is done, login to AWS, and find the Lambda function
+3. Grab the trigger URL
+4. Update github app settings by setting the webhook URL and the secret
