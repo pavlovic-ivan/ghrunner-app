@@ -1,5 +1,4 @@
 module.exports = lambdaFunction;
-const { createNodeMiddleware, createProbot } = require("probot");
 const app = require("./app");
 
 const lowercaseKeys = require("lowercase-keys");

@@ -1,12 +1,12 @@
-/**
- * @param {import('probot').Probot} app
- */
 const owner = process.env.OWNER; 
 const repo = process.env.REPO;
 const runners_workflow = process.env.WORKFLOW_FILE_NAME;
 const ref = process.env.BRANCH;
 const jobFilter = process.env.JOB_FILTER;
 
+/**
+ * @param {import('probot').Probot} app
+ */
 module.exports = (app) => {
   app.on("workflow_job", async (context) => {
     if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes(jobFilter)){

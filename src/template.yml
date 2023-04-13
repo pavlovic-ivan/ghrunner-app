@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless GitHub app
+
+Parameters:
+  awsRole:
+    Description: The AWS ARN role
+    Type: String
+  functionName:
+    Description: The AWS Lambda's Function name
+    Type: String
+  githubOwner:
+    Description: The repository owner
+    Type: String
+  githubRepository:
+    Description: The name of the repository
+    Type: String
+  githubWorkflowName:
+    Description: The workflow name
+    Type: String
+  githubBranch:
+    Description: The branch name
+    Type: String
+  githubJobFilter:
+    Description: The Job Filter
+    Type: String
+  hostedZoneId:
+    Description: ID of the Hosted zone where static record set will be created
+    Type: String
+  fullDomainName:
+    Description: Full domain name of the record set
+    Type: String
+  tlsCertificateArn:
+    Description: ARN of the TLS certificate needed for the API Gateway custom domain name
+    Type: String
+
+Resources:
+  GHAppWebhookConsumerLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref functionName
+      Description: Basic Auth Funtion
+      CodeUri: ../dist
+      Handler: index.webhooks
+      Role: !Ref awsRole
+      Runtime: nodejs16.x
+      MemorySize: 256
+      Timeout: 20
+      PackageType: Zip
+      Tags:
+        map-migrated: d-server-01068mdjl5jze3
+      Events:
+        FetchHttpApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApiGateway
+            Path: /ghrunner-app
+            Method: POST
+      Environment:
+        Variables:
+          OWNER: !Ref githubOwner
+          REPO: !Ref githubRepository
+          WORKFLOW_FILE_NAME: !Ref githubWorkflowName
+          BRANCH: !Ref githubBranch
+          JOB_FILTER: !Ref githubJobFilter
+  
+  HttpApiGateway:
+    Type: AWS::Serverless::HttpApi
+    Tags:
+        map-migrated: d-server-01068mdjl5jze3
+
+  CustomDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties: 
+      DomainName: !Ref fullDomainName
+      DomainNameConfigurations: 
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref tlsCertificateArn
+      Tags:
+        map-migrated: d-server-01068mdjl5jze3
+
+  HttpApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties: 
+      ApiId: !Ref HttpApiGateway
+      DomainName: !Ref CustomDomainName
+      Stage: !Ref HttpApiGatewayApiGatewayDefaultStage ## = {LogicalName} + ApiGateway + {StageName} + Stage
+
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref fullDomainName
+      HostedZoneId: !Ref hostedZoneId
+      AliasTarget: 
+        DNSName: !GetAtt CustomDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt CustomDomainName.RegionalHostedZoneId
+      Type: A
