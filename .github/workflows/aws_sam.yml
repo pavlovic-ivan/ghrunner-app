@@ -12,30 +12,38 @@ jobs:
     environment: protected
     steps:
       - uses: actions/checkout@v3
+      
       - uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: npm
-      - name: Install NPM dependencies and build the project
-        run: |
-          npm ci
-          npm run build
-      - uses: aws-actions/setup-sam@v2
+      - name: Build docker image
+        run: npm run build
+
       - uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Push docker image
+        env:
+          ECR_REPO: ${{ secrets.ECR_REPO }}  
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPO
+          docker tag ghrunner-app-lambda:latest $ECR_REPO/ghrunner-app:latest
+          docker push $ECR_REPO/ghrunner-app:latest
+
+      - uses: aws-actions/setup-sam@v2
+      
       - name: Deploy to AWS Lambda
         env:
           AWS_ARN_ROLE: ${{ secrets.AWS_ARN_ROLE }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          OWNER: ${{ secrets.OWNER }}
-          REPO: ${{ secrets.REPO }}
-          WORKFLOW_FILE_NAME: ${{ secrets.WORKFLOW_FILE_NAME }}
-          BRANCH: ${{ secrets.BRANCH }}
           JOB_FILTER: ${{ secrets.JOB_FILTER }}
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           FULL_DOMAIN_NAME: ${{ secrets.FULL_DOMAIN_NAME }}
           TLS_CERTIFICATE_ARN: ${{ secrets.TLS_CERTIFICATE_ARN }}
+          PULUMI_BACKEND_URL: ${{ secrets.PULUMI_BACKEND_URL }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
         run: make up

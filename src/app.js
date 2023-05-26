@@ -1,41 +1,39 @@
-const owner = process.env.OWNER; 
-const repo = process.env.REPO;
-const runners_workflow = process.env.WORKFLOW_FILE_NAME;
-const ref = process.env.BRANCH;
+const { createOrDelete } = require("../infra")
+const config = require("../config.json");
+
 const jobFilter = process.env.JOB_FILTER;
 
 /**
  * @param {import('probot').Probot} app
  */
-module.exports = (app) => {
+const probotApp = async (app) => {
   app.on("workflow_job", async (context) => {
+    let stack_name = `ghrunner-${context.payload.workflow_job.id.toString()}`;
+
     if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes(jobFilter)){
+      console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
       console.log(`Received event from job: ${context.payload.workflow_job.id}. Action: ${context.payload.action}. Name: ${context.payload.workflow_job.name}`);
       var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
       
       if(action !== null){
-        let job_name = context.payload.workflow_job.name;
-        var label = context.payload.workflow_job.labels.join(',');
+        var labels = context.payload.workflow_job.labels.join(',');
+        console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
 
-        console.log(`Triggering Workflow Dispatch for job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${label}`);
-        if(action === 'completed'){
-          console.log(`Job was running on: runner-id ${context.payload.workflow_job.runner_id}, runner-name: ${context.payload.workflow_job.runner_name}`);
+        try {
+          let repo_full_name = context.payload.repository.full_name.split('/');
+          config.owner = repo_full_name[0];
+          config.repo = repo_full_name[1];
+          config.labels = labels;
+          
+          await createOrDelete(context, action, stack_name, config);
+        } catch (error) {
+          console.log(`Error occured while trying to destroy/create infrastructure. Error: ${error}`);
         }
-
-        context.octokit.actions.createWorkflowDispatch({
-          owner: owner,
-          repo: repo,
-          workflow_id: runners_workflow,
-          ref: ref,
-          inputs: {
-            action: action,
-            run_id: context.payload.workflow_job.run_id.toString(),
-            run_attempt: context.payload.workflow_job.run_attempt.toString(),
-            job_id: context.payload.workflow_job.id.toString(),
-            label: label
-          }
-        }); 
       }
+    } else {
+      console.debug(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Message=Received workflow job is not a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
     }
   });
-};
+}
+
+module.exports = probotApp;

@@ -9,18 +9,6 @@ Parameters:
   functionName:
     Description: The AWS Lambda's Function name
     Type: String
-  githubOwner:
-    Description: The repository owner
-    Type: String
-  githubRepository:
-    Description: The name of the repository
-    Type: String
-  githubWorkflowName:
-    Description: The workflow name
-    Type: String
-  githubBranch:
-    Description: The branch name
-    Type: String
   githubJobFilter:
     Description: The Job Filter
     Type: String
@@ -33,6 +21,12 @@ Parameters:
   tlsCertificateArn:
     Description: ARN of the TLS certificate needed for the API Gateway custom domain name
     Type: String
+  pulumiBackendUrl:
+    Description: URL to the S3 bucket for Pulumi to store state files
+    Type: String
+  ecrRepo:
+    Description: URL of ECR repo
+    Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -40,13 +34,15 @@ Resources:
     Properties:
       FunctionName: !Ref functionName
       Description: Basic Auth Funtion
-      CodeUri: ../dist
-      Handler: index.webhooks
       Role: !Ref awsRole
-      Runtime: nodejs16.x
-      MemorySize: 256
-      Timeout: 20
-      PackageType: Zip
+      Architectures: 
+        - arm64
+      MemorySize: 512
+      EphemeralStorage:
+        Size: 10240
+      Timeout: 300
+      PackageType: Image
+      ImageUri: !Join [ ":", [ !Ref ecrRepo, 'latest' ] ]
       Tags:
         map-migrated: d-server-01068mdjl5jze3
       Events:
@@ -58,11 +54,8 @@ Resources:
             Method: POST
       Environment:
         Variables:
-          OWNER: !Ref githubOwner
-          REPO: !Ref githubRepository
-          WORKFLOW_FILE_NAME: !Ref githubWorkflowName
-          BRANCH: !Ref githubBranch
           JOB_FILTER: !Ref githubJobFilter
+          PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi

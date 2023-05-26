@@ -2,5 +2,6 @@ default_events:
   - actions
 
 default_permissions:
+  administration: write
   metadata: read
   actions: write
