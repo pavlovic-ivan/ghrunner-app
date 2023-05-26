@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - GR-OSS-376_add_pulumi_infra_codebase
   workflow_dispatch:
 
 jobs:
