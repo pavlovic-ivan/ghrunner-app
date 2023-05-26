@@ -1,4 +1,4 @@
-FROM --platform=linux/aarch64 public.ecr.aws/lambda/nodejs:16
+FROM public.ecr.aws/lambda/nodejs:16
 
 # ENV PATH="/root/.pulumi/bin:${PATH}"
 RUN yum install tar gzip -y \

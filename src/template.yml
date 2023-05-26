@@ -35,8 +35,6 @@ Resources:
       FunctionName: !Ref functionName
       Description: Basic Auth Funtion
       Role: !Ref awsRole
-      Architectures: 
-        - arm64
       MemorySize: 512
       EphemeralStorage:
         Size: 10240
