@@ -40,9 +40,9 @@ const createOrDelete = async (context, action, stackName, config) => {
     await stack.workspace.installPlugin("aws", "v4.0.0");
     
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
-    await stack.setConfig("aws:token", { value: process.env.AWS_SESSION_TOKEN });
-    await stack.setConfig("aws:secretKey", { value: process.env.AWS_SECRET_ACCESS_KEY });
-    await stack.setConfig("aws:accessKey", { value: process.env.AWS_ACCESS_KEY_ID });
+    // await stack.setConfig("aws:token", { value: process.env.AWS_SESSION_TOKEN });
+    // await stack.setConfig("aws:secretKey", { value: process.env.AWS_SECRET_ACCESS_KEY });
+    // await stack.setConfig("aws:accessKey", { value: process.env.AWS_ACCESS_KEY_ID });
 
     let stackConfig = await stack.getAllConfig();
     console.log(`Stack config: ${JSON.stringify(stackConfig)}`);
