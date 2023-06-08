@@ -4,7 +4,7 @@ To have the function run successfully, and to have the workflow be able to creat
 
 # Create Github App
 
-First, think about a sattic Webhook URL that you want to use. Assuming you have a domain like `my.domain.com`, and assuming you want to receive Github webhook events on `webhook` subdomain, the full record (A type record - created for you by AWS SAM) would be `webhook.my.comain.com`. The backend that runs behind the Lambda function, will be exposed on the path `/ghrunner-app`. And, later on you will create a TLS certificate, which implies that `https` protocol will be used. End result for the full static Webhook URL will be `https://webhook.my.domain.com/ghrunner-app`. Think about this URL first, because now you will create and configure your Github app. Later on, you will run a workflow that creates several AWS resources, and deployes the function. But first create your Github App:
+First, think about a sattic Webhook URL that you want to use. Assuming you have a domain like `my.domain.com`, and assuming you want to receive Github webhook events on `webhook` subdomain, the full record (A type record - created for you by AWS SAM) would be `webhook.my.domain.com`. The backend that runs behind the Lambda function, will be exposed on the path `/ghrunner-app`. And, later on you will create a TLS certificate, which implies that `https` protocol will be used. End result for the full static Webhook URL will be `https://webhook.my.domain.com/ghrunner-app`. Think about this URL first, because now you will create and configure your Github app. Later on, you will run a workflow that creates several AWS resources, and deployes the function. But first create your Github App:
 - open the settings page of your profile in Github
 - then go to Developer Settings > Github Apps
 - hit the "New Github App" button
@@ -12,6 +12,7 @@ First, think about a sattic Webhook URL that you want to use. Assuming you have 
 - give your app a homepage, it can be whatever you want
 - scroll down to section **Wehbook**
 - set the **Webhook URL** to the URL you want to use as a static URL (eg: `https://webhook.my.domain.com/ghrunner-app`)
+- set your **Webhook secret** and save it, you will need it later
 - scroll to **Repository Permissions**
 - set **Actions** permission to **Read and write**
 - set **Administration** permission to **Read and write**
@@ -22,18 +23,19 @@ First, think about a sattic Webhook URL that you want to use. Assuming you have 
 - scroll down to **Private keys** and hit the **Generate a private key** button
 - save the `.pem` file to your filesystem and rename it to `ghapp.pem`.
 
-Now the app needs to be installed. To do that open the **Install App** page. Select your account and hit the **Install** button. Choose one of the two options provided. Either install the app on **All repositories**, all choose the **Only selected repositories**. If you choose the **Only selected repositories**, search for the repository / repositories for which you want to install the app.
+Now the app needs to be installed. To do that open the **Install App** page. Select your account and hit the **Install** button. Choose one of the two options provided. Either install the app on **All repositories**, or choose the **Only selected repositories**. If you choose the **Only selected repositories**, search for the repository / repositories for which you want to install the app.
 
 Now the app is configured and installed. 
 
 # R53 domain setup and certificate
 
-1. in order to be able to use a static webhook url, first we need a R53 hosted zone id. if a hosted zone does not exist, create one. save the hosted zone id. id will be set as environment variable
-2. after a hosted zone id is obtained, create a TLS certificate with AWS Certificate Manager. try to use catch-all domain as domain name (like `*.my.domain.com`). save the certificate ARN. ARN will be set as environment variable
-3. think of the full domain name you would want to use as a static webhook url. this will also exist as an environment variable
-4. once the certificate is created, make sure to create required R53 records necessary for the certificate to work. use the "Create records in Route 53" button in certificate details page
+In order to be able to use a static webhook url, first we need a R53 hosted zone id. If a hosted zone does not exist, create one. Save the hosted zone id. Id will be set as environment variable later.
 
-summary: after this step, these would be the list of environment variables that you would set up at the end
+After a hosted zone id is obtained, create a TLS certificate with AWS Certificate Manager. Try to use catch-all domain as domain name (like `*.my.domain.com`). Save the certificate ARN. ARN will be set as environment variable later.
+
+Once the certificate is created, make sure to create required R53 records necessary for the certificate to work. Use the "Create records in Route 53" button in certificate details page.
+
+Note: after this step, this would be the list of environment variables that you would set up later:
 ```
 HOSTED_ZONE_ID=<zone id>
 FULL_DOMAIN_NAME=<example: webhook.my.domain.com>
@@ -41,9 +43,9 @@ TLS_CERTIFICATE_ARN=<certificate arn>
 ```
 # S3 buckets
 
-1. you will need two S3 buckets. one bucket to store AWS SAM artifacts, and another for Pulumi artifcats. both of these will be set as environment variables
+You will need two S3 buckets. One bucket to store AWS SAM artifacts, and another for Pulumi artifacts. Both of these will be set as environment variables later. 
 
-summary: after this step, these would be the list of environment variables that you would set up at the end
+Note: make sure that all public access to the bucket is disabled. After this step, this would be the list of environment variables that you would set up later: 
 ```
 # previously added
 HOSTED_ZONE_ID=<zone id>
@@ -51,10 +53,10 @@ FULL_DOMAIN_NAME=<example: webhook.my.domain.com>
 TLS_CERTIFICATE_ARN=<certificate arn>
 
 # added now
-AWS_S3_BUCKET=<s3 bucket name for AWS SAM templates, example: my-account.us-east-1.sam.templates>
-PULUMI_BACKEND_URL=s3://<my-account.us-east-1.pulumi.state>
+AWS_S3_BUCKET=<account>.<region>.sam.artifacts
+PULUMI_BACKEND_URL=s3://<account>.<region>.pulumi.artifacts
 ```
-note: because of the fact that one bucket is used by AWS SAM and the other is used by Pulumi, in the later, the protocol needs to prefix the bucket name. also make sure that all public access to the bucket is disabled
+Note: because of the fact that one bucket is used by AWS SAM and the other is used by Pulumi, the later bucket needs to be prefixed with the protocol.
 
 # AWS Secrets
 
@@ -68,7 +70,7 @@ There are 4 secrets that need to be created with Secrets Manager. So open Secret
 
 In order for the backend to work, it needs several tools installed, as well as an appropriate runtime. Which is why the project is built with Docker. Each time workflow runs, it will try to build a Docker image, and push it to an AWS ECR repository. Create an ECR repo called `ghrunner-app`. Save the ECR repo URI, it will be exposed as an environment variable.
 
-summary: after this step, these would be the list of environment variables that you would set up at the end
+Note: after this step, this would be the list of environment variables that you would set up later:
 ```
 # previously added
 HOSTED_ZONE_ID=<zone id>
@@ -81,12 +83,9 @@ PULUMI_BACKEND_URL=s3://<my-account.us-east-1.pulumi.state>
 ECR_REPO=<account-id>.dkr.ecr.<aws-region>.amazonaws.com
 ```
 
-note: the repo name `ghrunner-app` will be appended automatically by the [Makefile](Makefile).
+Note: the repo name `ghrunner-app` will be appended automatically by the [Makefile](Makefile).
 
 # IAM resources
-
-## Create IAM resources
-
 To make the application able to run properly, several IAM resources need to be created.
 
 First create an IAM policy, but replace the placeholders in the json example, with a bucket ARN created above (the bucket for AWS SAM templates) and hosted zone id. Pay attention to the asterisk, don't remove it:
