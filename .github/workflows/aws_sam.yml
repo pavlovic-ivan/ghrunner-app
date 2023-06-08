@@ -2,7 +2,6 @@ name: Deploy the lambda using AWS SAM
 on:
   push:
     branches:
-      - main
       - GR-OSS-376_add_pulumi_infra_codebase
   workflow_dispatch:
 
@@ -10,7 +9,7 @@ jobs:
   deploy:
     name: deploy
     runs-on: ubuntu-latest
-    environment: protected
+    environment: GR-OSS-376
     steps:
       - uses: actions/checkout@v3
       
