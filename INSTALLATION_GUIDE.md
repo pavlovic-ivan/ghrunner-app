@@ -135,10 +135,7 @@ First create an IAM policy, but replace the placeholders in the json example, wi
                 "lambda:DeleteFunction",
                 "ecr:InitiateLayerUpload",
                 "ecr:BatchCheckLayerAvailability",
-                "cloudformation:ListStackResources",
-                "cloudformation:CreateChangeSet",
-                "cloudformation:DescribeStacks",
-                "cloudformation:DescribeChangeSet"
+                "cloudformation:*"
             ],
             "Resource": "*"
         },
