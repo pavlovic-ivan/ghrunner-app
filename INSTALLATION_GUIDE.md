@@ -96,6 +96,29 @@ First create an IAM policy, but replace the placeholders in the json example, wi
         {
             "Effect": "Allow",
             "Action": [
+                "lambda:CreateFunction",
+                "lambda:TagResource",
+                "lambda:GetFunction",
+                "lambda:UpdateFunctionConfiguration",
+                "ecr:GetAuthorizationToken",
+                "ecr:UploadLayerPart",
+                "lambda:GetFunctionCodeSigningConfig",
+                "ecr:PutImage",
+                "lambda:UpdateFunctionCode",
+                "lambda:AddPermission",
+                "lambda:ListTags",
+                "ecr:CompleteLayerUpload",
+                "lambda:DeleteFunction",
+                "ecr:InitiateLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "cloudformation:*",
+                "iam:CreateServiceLinkedRole"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
                 "route53:GetChange",
                 "apigateway:*",
                 "route53:GetHostedZone",
@@ -116,28 +139,6 @@ First create an IAM policy, but replace the placeholders in the json example, wi
                     "iam:PassedToService": "lambda.amazonaws.com"
                 }
             }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "lambda:CreateFunction",
-                "lambda:TagResource",
-                "lambda:GetFunction",
-                "lambda:UpdateFunctionConfiguration",
-                "ecr:GetAuthorizationToken",
-                "ecr:UploadLayerPart",
-                "lambda:GetFunctionCodeSigningConfig",
-                "ecr:PutImage",
-                "lambda:UpdateFunctionCode",
-                "lambda:AddPermission",
-                "lambda:ListTags",
-                "ecr:CompleteLayerUpload",
-                "lambda:DeleteFunction",
-                "ecr:InitiateLayerUpload",
-                "ecr:BatchCheckLayerAvailability",
-                "cloudformation:*"
-            ],
-            "Resource": "*"
         },
         {
             "Effect": "Allow",
@@ -237,6 +238,8 @@ Deployment workflow runs through an environment. So head to the repository setti
 - AWS_SECRET_ACCESS_KEY: `<aws secret access key from user created above>`
 - AWS_REGION: `<aws region used to create resources above>`
 - JOB_FILTER: `<taken from the jobs labels, to filter for which jobs runner will be created>`
+
+Lastly, edit your `config.json` file, and set the proper machine image and other properties.
 
 # Next and final steps
 1. Enable Github Actions by going to the Actions page and following the steps described
