@@ -8,7 +8,8 @@ su - runner -c "cd runner && \
                     --labels {{labels}} \
                     --disableupdate \
                     --unattended \
-                    --ephemeral"
+                    --ephemeral \
+                    --no-default-labels"
 
 cd ~runner/runner
 ./svc.sh install runner
