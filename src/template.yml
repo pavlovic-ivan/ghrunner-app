@@ -27,6 +27,9 @@ Parameters:
   ecrRepo:
     Description: URL of ECR repo
     Type: String
+  timestamp:
+    Description: Timestamp of the deployment
+    Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -54,6 +57,7 @@ Resources:
         Variables:
           JOB_FILTER: !Ref githubJobFilter
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
+          DEPLOYMENT_TIMESTAMP: !Ref timestamp
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi
