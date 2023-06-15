@@ -5,8 +5,7 @@ const createInstance = (identity, securityGroup, script, config) => {
     const ami = aws.ec2.getAmiOutput({
         filters: [{
             name: "name",
-            // values: [ config.machineImage ],
-            values: "gross-cuda-nvidia-ghrunner-23050-amd64",
+            values: [ config.machineImage ],
         }],
         owners: [identity.accountId],
     });
