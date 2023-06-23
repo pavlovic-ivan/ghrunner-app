@@ -1,6 +1,6 @@
 {
-    "machineType": "g4dn.xlarge",
-    "machineImage": "gross-cuda-nvidia-ghrunner-23050-amd64",
+    "machineType": "t2.medium",
+    "machineImage": "gross-vanilla-ghrunner-23050-amd64",
     "bootDiskSizeInGB": 100,
     "bootDiskType": "gp2"
 }
