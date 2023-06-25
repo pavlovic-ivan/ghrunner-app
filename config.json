@@ -1,6 +1,6 @@
 {
     "machineType": "t2.medium",
-    "machineImage": "gross-ghrunner-vanilla-ivan-demo",
+    "machineImage": "gross-ghrunner-vanilla-ljubo-demo",
     "bootDiskSizeInGB": 100,
     "bootDiskType": "gp2"
 }
