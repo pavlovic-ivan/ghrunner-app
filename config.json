@@ -1,6 +1,6 @@
 {
     "machineType": "t2.medium",
-    "machineImage": "gross-ghrunner-vanilla-ljubo-demo-23050-amd64",
+    "machineImage": "gross-release-without-nvidia-ghrunner-23050-amd64",
     "bootDiskSizeInGB": 100,
     "bootDiskType": "gp2"
 }
