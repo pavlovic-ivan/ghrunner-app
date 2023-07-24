@@ -1,5 +1,5 @@
 {
-    "machineType": "t2.medium",
+    "machineType": "t2.large",
     "machineImage": "gross-release-without-nvidia-ghrunner-23060-amd64",
     "bootDiskSizeInGB": 100,
     "bootDiskType": "gp2"
