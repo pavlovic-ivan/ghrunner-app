@@ -1,5 +1,5 @@
 {
-    "machineType": "t3a.xlarge",
+    "machineType": "t3a.2xlarge",
     "machineImage": "gross-release-without-nvidia-ghrunner-23060-amd64",
     "bootDiskSizeInGB": 100,
     "bootDiskType": "gp2"
