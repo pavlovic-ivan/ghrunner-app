@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - deploy_armada
+      - deploy_parquetsharp
   workflow_dispatch:
 
 jobs:

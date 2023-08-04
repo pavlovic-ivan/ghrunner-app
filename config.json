@@ -1,6 +1,6 @@
 {
-    "machineType": "t3a.2xlarge",
-    "machineImage": "gross-release-without-nvidia-ghrunner-23060-amd64",
-    "bootDiskSizeInGB": 100,
+    "machineType": "t4g.xlarge",
+    "machineImage": "gross-ghrunner-pwsh-libicu-23060-arm64",
+    "bootDiskSizeInGB": 500,
     "bootDiskType": "gp2"
 }
