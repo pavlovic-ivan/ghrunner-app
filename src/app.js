@@ -1,5 +1,6 @@
 const { createOrDelete } = require("../infra")
 const config = require("../config.json");
+const uuid = require("uuid");
 
 const jobFilter = process.env.JOB_FILTER;
 
@@ -23,7 +24,7 @@ const probotApp = async (app) => {
           if(action === "completed"){
             stack_name = context.payload.workflow_job.runner_name;
           } else {
-            stack_name = `ghrunner-${context.payload.workflow_job.id.toString()}`;
+            stack_name = `ghrunner-${uuid.v4()}`;
           }
 
           let repo_full_name = context.payload.repository.full_name.split('/');

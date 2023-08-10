@@ -14,7 +14,8 @@
     "@pulumi/pulumi": "^3.61.0",
     "mustache": "^4.2.0",
     "octokit": "^2.0.14",
-    "probot": "^12.2.3"
+    "probot": "^12.2.3",
+    "uuid": "^8.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",
