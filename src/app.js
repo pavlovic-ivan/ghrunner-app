@@ -1,5 +1,6 @@
 const { createOrDelete } = require("../infra")
 const config = require("../config.json");
+const uuid = require("uuid");
 
 const jobFilter = process.env.JOB_FILTER;
 
@@ -8,7 +9,6 @@ const jobFilter = process.env.JOB_FILTER;
  */
 const probotApp = async (app) => {
   app.on("workflow_job", async (context) => {
-    let stack_name = `ghrunner-${context.payload.workflow_job.id.toString()}`;
 
     if(context.payload.workflow_job.name !== null && context.payload.workflow_job.name.includes(jobFilter)){
       console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
@@ -20,6 +20,13 @@ const probotApp = async (app) => {
         console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
 
         try {
+          let stack_name; 
+          if(action === "completed"){
+            stack_name = context.payload.workflow_job.runner_name;
+          } else {
+            stack_name = `ghrunner-${uuid.v4()}`;
+          }
+
           let repo_full_name = context.payload.repository.full_name.split('/');
           config.owner = repo_full_name[0];
           config.repo = repo_full_name[1];
