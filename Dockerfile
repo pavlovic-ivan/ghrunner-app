@@ -8,7 +8,7 @@ RUN yum install tar gzip -y \
 
 ENV PULUMI_HOME=/tmp/.pulumi
 
-COPY package.json package-lock.json register-runner.sh config.json ${LAMBDA_TASK_ROOT}/
+COPY package.json package-lock.json register-runner.sh ${LAMBDA_TASK_ROOT}/
 COPY src/ ${LAMBDA_TASK_ROOT}/src
 COPY infra/ ${LAMBDA_TASK_ROOT}/infra
 
