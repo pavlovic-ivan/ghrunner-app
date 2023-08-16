@@ -1,6 +1,0 @@
-{
-    "machineType": "t4g.xlarge",
-    "machineImage": "gross-ghrunner-pwsh-libicu-23060-arm64",
-    "bootDiskSizeInGB": 500,
-    "bootDiskType": "gp2"
-}

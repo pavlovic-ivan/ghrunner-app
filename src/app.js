@@ -1,5 +1,4 @@
 const { createOrDelete } = require("../infra")
-const config = require("../config.json");
 const uuid = require("uuid");
 
 const jobFilter = process.env.JOB_FILTER;
@@ -28,9 +27,15 @@ const probotApp = async (app) => {
           }
 
           let repo_full_name = context.payload.repository.full_name.split('/');
-          config.owner = repo_full_name[0];
-          config.repo = repo_full_name[1];
-          config.labels = labels;
+          let config = {
+            machineType: process.env.MACHINE_TYPE,
+            machineImage: process.env.MACHINE_IMAGE,
+            bootDiskSizeInGB: process.env.BOOT_DISK_SIZE_IN_GB,
+            bootDiskType: process.env.BOOT_DISK_TYPE,
+            owner: repo_full_name[0],
+            repo: repo_full_name[1],
+            labels: labels
+          }
           
           await createOrDelete(context, action, stack_name, config);
         } catch (error) {
