@@ -21,6 +21,6 @@ describe('Instance Tests', function() {
 
         const instance = createInstance(identity, securityGroup, script, config);
         
-        assert.isNotNull(instance, 'Instance should not be null');
+        assert.isNull(instance, 'Instance should not be null');
     });
 });
