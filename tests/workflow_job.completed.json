@@ -1,0 +1,18 @@
+{
+    "action": "completed",
+    "workflow_job": {
+      "id": 12345678901,
+      "run_id": 1234567890,
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "name": "test-library (cuda-5882938922-1, ILGPU.Algorithms, netcoreapp3.1)",
+      "labels": [
+        "cuda-5882938922-1-ILGPU.Algorithms-netcoreapp3.1"
+      ],
+      "runner_name": "ghrunner-123456"
+    },
+    "repository": {
+      "full_name": "owner/repo"
+    }
+  }
