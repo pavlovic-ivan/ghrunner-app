@@ -30,6 +30,18 @@ Parameters:
   timestamp:
     Description: Timestamp of the deployment
     Type: String
+  machineType:
+    Description: AWS EC2 type
+    Type: String
+  machineImage:
+    Description: Name of AMI
+    Type: String
+  bootDiskSizeInGB:
+    Description: Boot disk size ion GB
+    Type: String
+  bootDiskType:
+    Description: Boot disk type
+    Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -58,6 +70,10 @@ Resources:
           JOB_FILTER: !Ref githubJobFilter
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
           DEPLOYMENT_TIMESTAMP: !Ref timestamp
+          MACHINE_TYPE: !Ref machineType 
+          MACHINE_IMAGE: !Ref machineImage
+          BOOT_DISK_SIZE_IN_GB: !Ref bootDiskSizeInGB
+          BOOT_DISK_TYPE: !Ref bootDiskType
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi

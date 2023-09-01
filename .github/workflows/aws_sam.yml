@@ -6,10 +6,28 @@ on:
   workflow_dispatch:
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: npm
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Run Tests
+        run: npm test
+
   deploy:
     name: deploy
     runs-on: ubuntu-latest
     environment: protected
+    needs: test
     steps:
       - uses: actions/checkout@v3
       
@@ -46,4 +64,8 @@ jobs:
           TLS_CERTIFICATE_ARN: ${{ secrets.TLS_CERTIFICATE_ARN }}
           PULUMI_BACKEND_URL: ${{ secrets.PULUMI_BACKEND_URL }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
+          MACHINE_TYPE: ${{ vars.MACHINE_TYPE }}
+          MACHINE_IMAGE: ${{ vars.MACHINE_IMAGE }}
+          BOOT_DISK_SIZE_IN_GB: ${{ vars.BOOT_DISK_SIZE_IN_GB }}
+          BOOT_DISK_TYPE: ${{ vars.BOOT_DISK_TYPE }}
         run: make up
