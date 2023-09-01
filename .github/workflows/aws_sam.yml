@@ -22,6 +22,8 @@ jobs:
       
       - name: Run Tests
         run: npm test
+        env:
+          JOB_FILTER: ${{ secrets.JOB_FILTER }}
 
   deploy:
     name: deploy
