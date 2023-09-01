@@ -6,9 +6,9 @@
       "run_attempt": 1,
       "status": "completed",
       "conclusion": "success",
-      "name": "test-library (cuda-5882938922-1, ILGPU.Algorithms, netcoreapp3.1)",
+      "name": "test-library (cuda, ILGPU.Algorithms, netcoreapp3.1)",
       "labels": [
-        "cuda-5882938922-1-ILGPU.Algorithms-netcoreapp3.1"
+        "cuda"
       ],
       "runner_name": "ghrunner-123456"
     },
