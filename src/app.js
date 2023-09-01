@@ -18,7 +18,6 @@ const probotApp = async (app) => {
         var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
         
         if(action !== null){
-          var labels = context.payload.workflow_job.labels.join(',');
           console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
   
           try {
