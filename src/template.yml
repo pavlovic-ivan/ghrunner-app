@@ -47,7 +47,7 @@ Resources:
   GHAppWebhookConsumerLambda:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Ref functionName
+      FunctionName: !Join [ "-", [ !Ref functionName, !Ref timestamp ] ]
       Description: Basic Auth Funtion
       Role: !Ref awsRole
       MemorySize: 512
