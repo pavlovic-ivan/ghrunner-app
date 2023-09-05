@@ -12,6 +12,6 @@ COPY package.json package-lock.json register-runner.sh ${LAMBDA_TASK_ROOT}/
 COPY src/ ${LAMBDA_TASK_ROOT}/src
 COPY infra/ ${LAMBDA_TASK_ROOT}/infra
 
-RUN npm install
+RUN npm ci
 
 CMD [ "src/server.handler" ]
