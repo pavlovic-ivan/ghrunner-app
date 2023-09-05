@@ -112,7 +112,8 @@ First create an IAM policy, but replace the placeholders in the json example, wi
                 "ecr:InitiateLayerUpload",
                 "ecr:BatchCheckLayerAvailability",
                 "cloudformation:*",
-                "iam:CreateServiceLinkedRole"
+                "iam:CreateServiceLinkedRole",
+                "lambda:RemovePermission"
             ],
             "Resource": "*"
         },
