@@ -1,8 +1,6 @@
-const { ToadScheduler, SimpleIntervalJob, Task } = require('toad-scheduler')
+const nodeCron = require('node-cron');
 
-const scheduler = new ToadScheduler()
-
-const task = new Task('simple task', () => { console.log('simple task printout') })
-const job = new SimpleIntervalJob({ seconds: 20, }, task)
-
-scheduler.addSimpleIntervalJob(job)
+nodeCron.schedule('* * * * * *', () => {
+  // This job will run every second
+  console.log(new Date().toLocaleTimeString());
+})
