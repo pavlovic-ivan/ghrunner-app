@@ -69,7 +69,7 @@ const createOrDelete = async (context, action, stackName, config) => {
             break;
         case "requested":
             console.info("updating stack...");
-            await stack.up({ onOutput: console.debug });
+            await stack.up({ onOutput: console.info });
             console.info("updating stack complete");
             break;
         default:
