@@ -50,9 +50,24 @@ const createOrDelete = async (context, action, stackName, config) => {
 
     switch(action){
         case "completed":
-            console.info("destroying stack...");
-            await stack.destroy();
-            console.info("stack destroy complete");
+            let retries = 3;
+            while (retries > 0) {
+                try {
+                    console.info("destroying stack...");
+                    await stack.destroy();
+                    console.info("stack destroy complete");
+                    break;
+                } catch (err) {
+                    console.error("Destroying stack failed:", err);
+                    retries--;
+                    if (retries === 0) {
+                        console.log("No more retries, exiting...");
+                        throw err;
+                    }
+                    console.log(`Retries left: ${retries}. Retrying...`);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+            }
             break;
         case "requested":
             console.info("updating stack...");
