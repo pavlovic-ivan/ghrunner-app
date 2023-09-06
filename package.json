@@ -16,6 +16,7 @@
     "mustache": "^4.2.0",
     "octokit": "^2.0.14",
     "probot": "^12.2.3",
+    "toad-scheduler": "^3.0.0",
     "uuid": "^8.0.0"
   },
   "devDependencies": {
