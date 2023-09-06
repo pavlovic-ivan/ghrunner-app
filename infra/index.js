@@ -41,8 +41,6 @@ const createOrDelete = async (context, action, stackName, config) => {
     
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
 
-    let stackConfig = await stack.getAllConfig();
-
     console.info("refreshing stack...");
     await stack.refresh();
     console.info("refresh complete");
