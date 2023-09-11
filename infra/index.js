@@ -46,6 +46,10 @@ const createOrDelete = async (context, action, stackName, config) => {
     console.info("refresh complete");
     console.info("refresh complete again");
 
+    console.info("STACK INFO GET");
+    console.info(stack.info());
+    console.info("STACK INFO DONE");
+
     switch(action){
         case "completed":
             let retries = 3;
@@ -56,7 +60,7 @@ const createOrDelete = async (context, action, stackName, config) => {
                     console.info("stack destroy complete");
                     break;
                 } catch (err) {
-                    console.error("Destroying stack failed:", err);
+                    console.info("Destroying stack failed:", err);
                     retries--;
                     if (retries === 0) {
                         console.log("No more retries, exiting...");
