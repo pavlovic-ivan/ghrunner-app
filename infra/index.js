@@ -51,7 +51,9 @@ const createOrDelete = async (context, action, stackName, config) => {
         case "completed":
             try {
                 console.info("destroying stack...");
-                const res = await retry(stack.destroy(), null, {
+                const res = await retry(async () => {
+                    return stack.destroy()
+                }, null, {
                     retriesMax: 3,
                     interval: 5000
                 });
