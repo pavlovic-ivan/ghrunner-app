@@ -47,7 +47,8 @@ const createOrDelete = async (context, action, stackName, config) => {
     console.info("refresh complete again");
 
     console.info("STACK INFO GET");
-    console.info(stack.info());
+    let info = await stack.info();
+    console.info(JSON.stringify(info));
     console.info("STACK INFO DONE");
 
     switch(action){
