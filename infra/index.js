@@ -4,6 +4,8 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
+const retry = require('async-await-retry');
+
 
 const createOrDelete = async (context, action, stackName, config) => {
     console.log('About to create/delete infra');
@@ -53,23 +55,15 @@ const createOrDelete = async (context, action, stackName, config) => {
 
     switch(action){
         case "completed":
-            let retries = 3;
-            while (retries > 0) {
-                try {
-                    console.info("destroying stack...");
-                    await stack.destroy();
-                    console.info("stack destroy complete");
-                    break;
-                } catch (err) {
-                    console.info("Destroying stack failed:", err);
-                    retries--;
-                    if (retries === 0) {
-                        console.log("No more retries, exiting...");
-                        throw err;
-                    }
-                    console.log(`Retries left: ${retries}. Retrying...`);
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                }
+            try {
+                console.info("destroying stack...");
+                const res = await retry(stack.destroy(), null, {
+                    retriesMax: 3,
+                    interval: 5000
+                });
+                console.info("stack destroy complete");
+            } catch (err) {
+                console.log('The function execution failed !')
             }
             break;
         case "requested":
