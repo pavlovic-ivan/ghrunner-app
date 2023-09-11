@@ -46,12 +46,6 @@ const createOrDelete = async (context, action, stackName, config) => {
     console.info("refreshing stack...");
     await stack.refresh();
     console.info("refresh complete");
-    console.info("refresh complete again");
-
-    console.info("STACK INFO GET");
-    let info = await stack.info();
-    console.info(JSON.stringify(info));
-    console.info("STACK INFO DONE");
 
     switch(action){
         case "completed":
@@ -63,7 +57,7 @@ const createOrDelete = async (context, action, stackName, config) => {
                 });
                 console.info("stack destroy complete");
             } catch (err) {
-                console.log('The function execution failed !')
+                console.log(`The function execution failed! Error: ${err}`);
             }
             break;
         case "requested":
