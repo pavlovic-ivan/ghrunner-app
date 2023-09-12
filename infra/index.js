@@ -70,6 +70,7 @@ async function retryRefresh(stack, maxRetries, interval) {
         } catch (err) {
             if (i < maxRetries - 1) { // if it's not the last retry
                 console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                await stack.cancel();
                 await new Promise(resolve => setTimeout(resolve, interval));
             } else {
                 // If it's the last retry and it failed, throw the error
@@ -88,6 +89,7 @@ async function retryDestroy(stack, maxRetries, interval) {
         } catch (err) {
             if (i < maxRetries - 1) { // if it's not the last retry
                 console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                await stack.cancel();
                 await new Promise(resolve => setTimeout(resolve, interval));
             } else {
                 // If it's the last retry and it failed, throw the error
