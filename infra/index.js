@@ -4,7 +4,7 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
-const retry = require('async-await-retry');
+const retry = require('async-retry');
 
 
 const createOrDelete = async (context, action, stackName, config) => {
@@ -51,10 +51,14 @@ const createOrDelete = async (context, action, stackName, config) => {
         case "completed":
             try {
                 console.info("destroying stack...");
-                const res = await retry(stack.destroy(), null, {
-                    retriesMax: 3,
-                    interval: 5000
+
+                await retry(async () => {
+                    await stack.destroy();
+                }, {
+                    retries: 3,
+                    minTimeout: 10 * 1000,
                 });
+
                 console.info("stack destroy complete");
             } catch (err) {
                 console.log(`The function execution failed! Error: ${err}`);
