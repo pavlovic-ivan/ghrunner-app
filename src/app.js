@@ -21,15 +21,13 @@ const probotApp = async (app) => {
           console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
   
           try {
-            // let stack_name; 
-            // if(action === "completed"){
-            //   stack_name = context.payload.workflow_job.runner_name;
-            // } else {
-            //   stack_name = `ghrunner-${uuid.v4()}`;
-            // }
-  
-            let stack_name = "test-stack";
-            
+            let stack_name; 
+            if(action === "completed"){
+              stack_name = context.payload.workflow_job.runner_name;
+            } else {
+              stack_name = `ghrunner-${uuid.v4()}`;
+            }
+
             let repo_full_name = context.payload.repository.full_name.split('/');
             let config = {
               machineType: process.env.MACHINE_TYPE,
