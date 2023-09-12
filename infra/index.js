@@ -49,20 +49,8 @@ const createOrDelete = async (context, action, stackName, config) => {
 
     switch(action){
         case "completed":
-            try {
-                console.info("destroying stack...");
-
-                await retry(async () => {
-                    await stack.destroy();
-                }, {
-                    retries: 3,
-                    minTimeout: 10 * 1000,
-                });
-
-                console.info("stack destroy complete");
-            } catch (err) {
-                console.log(`The function execution failed! Error: ${err}`);
-            }
+            console.info("Attempting to destroy stack...");
+            await retryDestroy(stack, 3, 10000);
             break;
         case "requested":
             console.info("updating stack...");
@@ -73,6 +61,24 @@ const createOrDelete = async (context, action, stackName, config) => {
             throw new Error(`Unknown action received! Got: [${action}]`);
     }
 };
+
+async function retryDestroy(stack, maxRetries, interval) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            await stack.destroy();
+            console.info("stack destroy complete");
+            return; // if it succeeds, exit the function
+        } catch (err) {
+            if (i < maxRetries - 1) { // if it's not the last retry
+                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                await new Promise(resolve => setTimeout(resolve, interval));
+            } else {
+                // If it's the last retry and it failed, throw the error
+                throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
+            }
+        }
+    }
+}
 
 module.exports = {
     createOrDelete
