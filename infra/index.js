@@ -43,13 +43,13 @@ const createOrDelete = async (context, action, stackName, config) => {
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
 
     console.info("refreshing stack...");
-    await retryRefresh(stack, 3, 10000);
+    await retryRefresh(stack, 10, 30000);
     console.info("refresh complete");
 
     switch(action){
         case "completed":
             console.info("Attempting to destroy stack...");
-            await retryDestroy(stack, 3, 10000);
+            await retryDestroy(stack, 10, 30000);
             break;
         case "requested":
             console.info("updating stack...");
@@ -66,16 +66,15 @@ async function retryRefresh(stack, maxRetries, interval) {
         try {
             await stack.refresh();
             console.info("stack refresh complete");
-            return; // if it succeeds, exit the function
+            return;
         } catch (err) {
-            if (i < maxRetries - 1) { // if it's not the last retry
+            if (i < maxRetries - 1) {
                 console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
                 console.log("Runing stack.cancel")
                 await stack.cancel();
                 console.log("Runing stack.cancel done")
                 await new Promise(resolve => setTimeout(resolve, interval));
             } else {
-                // If it's the last retry and it failed, throw the error
                 throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
             }
         }
@@ -87,16 +86,15 @@ async function retryDestroy(stack, maxRetries, interval) {
         try {
             await stack.destroy();
             console.info("stack destroy complete");
-            return; // if it succeeds, exit the function
+            return;
         } catch (err) {
-            if (i < maxRetries - 1) { // if it's not the last retry
+            if (i < maxRetries - 1) {
                 console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
                 console.log("Runing stack.cancel")
                 await stack.cancel();
                 console.log("Runing stack.cancel done")
                 await new Promise(resolve => setTimeout(resolve, interval));
             } else {
-                // If it's the last retry and it failed, throw the error
                 throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
             }
         }
