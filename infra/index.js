@@ -43,7 +43,7 @@ const createOrDelete = async (context, action, stackName, config) => {
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
 
     console.info("refreshing stack...");
-    await stack.refresh();
+    await retryRefresh(stack, 3, 10000);
     console.info("refresh complete");
 
     switch(action){
@@ -60,6 +60,24 @@ const createOrDelete = async (context, action, stackName, config) => {
             throw new Error(`Unknown action received! Got: [${action}]`);
     }
 };
+
+async function retryRefresh(stack, maxRetries, interval) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            await stack.refresh();
+            console.info("stack refresh complete");
+            return; // if it succeeds, exit the function
+        } catch (err) {
+            if (i < maxRetries - 1) { // if it's not the last retry
+                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                await new Promise(resolve => setTimeout(resolve, interval));
+            } else {
+                // If it's the last retry and it failed, throw the error
+                throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
+            }
+        }
+    }
+}
 
 async function retryDestroy(stack, maxRetries, interval) {
     for (let i = 0; i < maxRetries; i++) {
