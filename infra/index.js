@@ -4,7 +4,6 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
-const retry = require('async-retry');
 
 
 const createOrDelete = async (context, action, stackName, config) => {
