@@ -27,7 +27,7 @@ const probotApp = async (app) => {
             } else {
               stack_name = `ghrunner-${uuid.v4()}`;
             }
-  
+
             let repo_full_name = context.payload.repository.full_name.split('/');
             let config = {
               machineType: process.env.MACHINE_TYPE,

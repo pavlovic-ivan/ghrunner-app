@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - add-retry-to-stack-destroy
   workflow_dispatch:
 
 jobs:

@@ -53,7 +53,7 @@ Resources:
       MemorySize: 512
       EphemeralStorage:
         Size: 10240
-      Timeout: 300
+      Timeout: 900
       PackageType: Image
       ImageUri: !Join [ ":", [ !Ref ecrRepo, 'latest' ] ]
       Tags:
