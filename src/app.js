@@ -13,15 +13,15 @@ const probotApp = async (app) => {
       const response = await context.octokit.gists.get({
         gist_id: "08620fb04d878f57ae62be4a8cedfc57"
       });
+
+      const content = response.data.files["ghrunner-app-ext-config.json"].content;
+
+      console.log("------ GIST")
+      console.log(content);
+      console.log("------ GIST")
     } catch (error) {
       console.error('Failed to fetch the Gist content:', error);
     }
-
-    const content = response.data.files["ghrunner-app-ext-config.json"].content;
-
-    console.log("------ GIST")
-    console.log(content);
-    console.log("------ GIST")
 
     if(Array.isArray(context.payload.workflow_job.labels) && context.payload.workflow_job.labels.length > 0){
       var labels = context.payload.workflow_job.labels.join(',');
