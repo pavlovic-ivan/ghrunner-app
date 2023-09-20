@@ -12,7 +12,10 @@ const probotApp = async (app) => {
     try {
       const response = await context.octokit.gists.get({
         gist_id: "08620fb04d878f57ae62be4a8cedfc57"
-    });
+      });
+    } catch (error) {
+      console.error('Failed to fetch the Gist content:', error);
+    }
 
     const content = response.data.files["ghrunner-app-ext-config.json"].content;
 
