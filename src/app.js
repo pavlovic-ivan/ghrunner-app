@@ -1,5 +1,6 @@
 const { createOrDelete } = require("../infra")
 const uuid = require("uuid");
+const fs = require('fs');
 
 const jobFilter = process.env.JOB_FILTER;
 
@@ -8,20 +9,6 @@ const jobFilter = process.env.JOB_FILTER;
  */
 const probotApp = async (app) => {
   app.on("workflow_job", async (context) => {
-
-    try {
-      const response = await context.octokit.gists.get({
-        gist_id: "08620fb04d878f57ae62be4a8cedfc57"
-      });
-
-      const content = response.data.files["ghrunner-app-ext-config.json"].content;
-
-      console.log("------ GIST")
-      console.log(content);
-      console.log("------ GIST")
-    } catch (error) {
-      console.error('Failed to fetch the Gist content:', error);
-    }
 
     if(Array.isArray(context.payload.workflow_job.labels) && context.payload.workflow_job.labels.length > 0){
       var labels = context.payload.workflow_job.labels.join(',');
@@ -34,6 +21,10 @@ const probotApp = async (app) => {
         if(action !== null){
           console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
   
+          const rawData = fs.readFileSync('../config.json', 'utf8');
+          const jsonObject = JSON.parse(rawData);
+          console.log(jsonObject);
+
           try {
             let stack_name; 
             if(action === "completed"){

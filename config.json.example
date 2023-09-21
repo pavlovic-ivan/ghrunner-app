@@ -1,0 +1,10 @@
+{
+    "cuda": {
+      "machineType": "asd",
+      "amiName": "asd"
+    },
+    "opencl": {
+      "machineType": "asd",
+      "amiName": "asd"
+    }
+  }
