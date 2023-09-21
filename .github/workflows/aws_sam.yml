@@ -10,6 +10,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    environment: protected
     steps:
       - uses: actions/checkout@v3
 
