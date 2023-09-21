@@ -42,6 +42,10 @@ const probotApp = async (app) => {
               labels: labels
             }
             
+            console.log('---- Full config')
+            console.log(config);
+            console.log('---- end')
+
             await createOrDelete(context, action, stack_name, config);
           } catch (error) {
             console.log(`Error occured while trying to destroy/create infrastructure. Error: ${error}`);
