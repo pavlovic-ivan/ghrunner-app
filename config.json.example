@@ -6,9 +6,9 @@
       "bootDiskType": "gp2"
     },
     "opencl": {
-        "machineType": "t2.micro",
-        "machineImage": "gross-ghrunner-23080-amd64",
-        "bootDiskSizeInGB": 100,
-        "bootDiskType": "gp2"
+      "machineType": "t2.micro",
+      "machineImage": "gross-ghrunner-23080-amd64",
+      "bootDiskSizeInGB": 100,
+      "bootDiskType": "gp2"
     }
   }
