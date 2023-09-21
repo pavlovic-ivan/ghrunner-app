@@ -59,14 +59,9 @@ jobs:
         env:
           AWS_ARN_ROLE: ${{ secrets.AWS_ARN_ROLE }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          JOB_FILTER: ${{ secrets.JOB_FILTER }}
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           FULL_DOMAIN_NAME: ${{ secrets.FULL_DOMAIN_NAME }}
           TLS_CERTIFICATE_ARN: ${{ secrets.TLS_CERTIFICATE_ARN }}
           PULUMI_BACKEND_URL: ${{ secrets.PULUMI_BACKEND_URL }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
-          MACHINE_TYPE: ${{ vars.MACHINE_TYPE }}
-          MACHINE_IMAGE: ${{ vars.MACHINE_IMAGE }}
-          BOOT_DISK_SIZE_IN_GB: ${{ vars.BOOT_DISK_SIZE_IN_GB }}
-          BOOT_DISK_TYPE: ${{ vars.BOOT_DISK_TYPE }}
         run: make up
