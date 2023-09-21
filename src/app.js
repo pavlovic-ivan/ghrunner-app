@@ -16,7 +16,7 @@ const probotApp = async (app) => {
       const configPerLabel = JSON.parse(rawConfigPerLabel);
 
       if(configPerLabel.hasOwnProperty(labels)){
-        console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}] Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
+        console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}]. Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
         console.log(`Received event from job: ${context.payload.workflow_job.id}. Action: ${context.payload.action}. Name: ${context.payload.workflow_job.name}`);
         var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
         
@@ -48,7 +48,7 @@ const probotApp = async (app) => {
           }
         }
       }else {
-        console.debug(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Message=Received workflow job is not a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
+        console.debug(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}]. Message=Received workflow job is not a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
       }
     }
   });
