@@ -21,9 +21,9 @@ const probotApp = async (app) => {
         if(action !== null){
           console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
   
-          const rawData = fs.readFileSync('config.json', 'utf8');
-          const jsonObject = JSON.parse(rawData);
-          console.log(jsonObject);
+          const rawConfigPerLabel = fs.readFileSync('config.json', 'utf8');
+          const configPerLabel = JSON.parse(rawConfigPerLabel);
+          console.log(configPerLabel[labels]);
 
           try {
             let stack_name; 
