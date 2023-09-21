@@ -6,3 +6,4 @@ ghrunner-app.json
 .gcloudignore
 .aws-sam
 dist
+config.json
