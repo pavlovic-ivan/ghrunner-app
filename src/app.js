@@ -14,10 +14,6 @@ const probotApp = async (app) => {
 
       const rawConfigPerLabel = fs.readFileSync('config.json', 'utf8');
       const configPerLabel = JSON.parse(rawConfigPerLabel);
-      console.log('---- Full configPerLabel')
-      console.log(configPerLabel);
-      console.log('---- end')
-
 
       if(configPerLabel.hasOwnProperty(labels)){
         console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}]. Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
@@ -45,10 +41,6 @@ const probotApp = async (app) => {
               repo: repo_full_name[1],
               labels: labels
             }
-            
-            console.log('---- Full config')
-            console.log(config);
-            console.log('---- end')
 
             await createOrDelete(context, action, stack_name, config);
           } catch (error) {
