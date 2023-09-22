@@ -1,6 +1,6 @@
 const { createOrDelete } = require("../infra")
 const uuid = require("uuid");
-const { convertYamlToJson } = require('util');
+const { convertYamlToJson } = require('./util');
 
 /**
  * @param {import('probot').Probot} app
