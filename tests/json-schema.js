@@ -8,10 +8,9 @@ const ajv = new Ajv();
 describe('Config Validation', () => {
   it('should validate the config against the schema', () => {
     const validate = ajv.compile(schema);
-
     const config = convertYamlToJson('config.yml');
-
     const valid = validate(config);
+
     if (!valid) {
       console.error(validate.errors);
     }
