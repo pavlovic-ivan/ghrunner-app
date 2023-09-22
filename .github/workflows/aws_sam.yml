@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - add-ext-config
   workflow_dispatch:
 
 jobs:
@@ -14,9 +15,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Transform YAML to JSON and echo to file
-        run: |
-          echo "${{ vars.CONFIG }}" | yq e -j - > ./config.json
-          ls -la
+        run: echo "${{ vars.CONFIG }}" > ./config.yml
       
       - uses: actions/setup-node@v3
         with:
@@ -38,9 +37,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Transform YAML to JSON and echo to file
-        run: |
-          echo "${{ vars.CONFIG }}" | yq e -j - > ./config.json
-          ls -la
+        run: echo "${{ vars.CONFIG }}" > ./config.yml
       
       - uses: actions/setup-node@v3
         with:

@@ -1,7 +1,6 @@
 const { createOrDelete } = require("../infra")
 const uuid = require("uuid");
-const fs = require('fs');
-const { config } = require("process");
+const { convertYamlToJson } = require('util');
 
 /**
  * @param {import('probot').Probot} app
@@ -12,8 +11,7 @@ const probotApp = async (app) => {
     if(Array.isArray(context.payload.workflow_job.labels) && context.payload.workflow_job.labels.length > 0){
       var labels = context.payload.workflow_job.labels.join(',');
 
-      const rawConfigPerLabel = fs.readFileSync('config.json', 'utf8');
-      const configPerLabel = JSON.parse(rawConfigPerLabel);
+      const configPerLabel = convertYamlToJson('config.yml')
 
       if(configPerLabel.hasOwnProperty(labels)){
         console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}]. Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
