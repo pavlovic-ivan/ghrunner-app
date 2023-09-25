@@ -19,7 +19,7 @@ describe('probotApp', () => {
   });
 
   describe('on workflow_job event', () => {
-    it('should log message when job name includes JOB_FILTER', async () => {
+    it('should log message when job labels includes cuda', async () => {
       const consoleSpy = sinon.spy(console, 'info');
       await probot.receive({ name: 'workflow_job', payload: mockPayload, id: "123456" });
       assert.strictEqual(consoleSpy.called, true);
