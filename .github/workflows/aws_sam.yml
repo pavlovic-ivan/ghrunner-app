@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - parameterize-pulumi-version
   workflow_dispatch:
 
 jobs:
@@ -42,8 +43,11 @@ jobs:
         with:
           node-version: 16
           cache: npm
+      
       - name: Build docker image
         run: npm run build
+        env:
+          PULUMI_VERSION: ${{ vars.PULUMI_VERSION }}
 
       - uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
