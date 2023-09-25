@@ -8,6 +8,9 @@ let initialized = false;
 let probot;
 
 exports.handler = async function (event, context) {
+    console.log('--- Show context');
+    console.log(JSON.stringify(context));
+    console.log('--- End show context');
     try {
         if (!initialized){
             const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([

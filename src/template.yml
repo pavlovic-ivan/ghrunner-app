@@ -50,6 +50,10 @@ Resources:
             ApiId: !Ref HttpApiGateway
             Path: /ghrunner-app
             Method: POST
+        ScheduleEvent:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: "rate(1 minute)"
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
