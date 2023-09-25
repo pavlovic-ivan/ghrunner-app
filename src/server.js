@@ -11,6 +11,9 @@ exports.handler = async function (event, context) {
     console.log('--- Show context');
     console.log(JSON.stringify(context));
     console.log('--- End show context');
+    console.log('--- Show event');
+    console.log(JSON.stringify(event));
+    console.log('--- End show event');
     try {
         if (!initialized){
             const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
