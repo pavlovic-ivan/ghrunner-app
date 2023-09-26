@@ -6,6 +6,9 @@ const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
 
+const RETRY_MAX = 10;
+const RETRY_INTERVAL = 30000;
+const HOUR_IN_MS = 3_600_000;
 
 const createOrDelete = async (context, action, stackName, config) => {
     console.log('About to create/delete infra');
@@ -44,59 +47,35 @@ const createOrDelete = async (context, action, stackName, config) => {
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
 
     console.info("refreshing stack...");
-    await retryRefresh(stack, 10, 30000);
+    await retryAction('refresh', stack.refresh, stack);
     console.info("refresh complete");
 
-    switch(action){
-        case "completed":
-            console.info("Attempting to destroy stack...");
-            await retryDestroy(stack, 10, 30000);
-            break;
-        case "requested":
-            console.info("updating stack...");
-            await stack.up({ onOutput: console.info });
-            console.info("updating stack complete");
-            break;
-        default:
-            throw new Error(`Unknown action received! Got: [${action}]`);
+    if (action === "completed") {
+        console.info("Attempting to destroy stack...");
+        await retryAction('destroy', stack.destroy, stack);
+    } else if (action === "requested") {
+        console.info("updating stack...");
+        await stack.up({ onOutput: console.info });
+        console.info("updating stack complete");
+    } else {
+        throw new Error(`Unknown action received! Got: [${action}]`);
     }
 };
 
-async function retryRefresh(stack, maxRetries, interval) {
+async function retryAction(actionName, action, stack, maxRetries = RETRY_MAX, interval = RETRY_INTERVAL) {
     for (let i = 0; i < maxRetries; i++) {
         try {
-            await stack.refresh();
-            console.info("stack refresh complete");
+            await action();
+            console.info(`Action [${actionName}] complete`);
             return;
         } catch (err) {
             if (i < maxRetries - 1) {
                 console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
-                console.log("Runing stack.cancel")
                 await stack.cancel();
-                console.log("Runing stack.cancel done")
+                console.log("Action cancelled");
                 await new Promise(resolve => setTimeout(resolve, interval));
             } else {
-                throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
-            }
-        }
-    }
-}
-
-async function retryDestroy(stack, maxRetries, interval) {
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            await stack.destroy();
-            console.info("stack destroy complete");
-            return;
-        } catch (err) {
-            if (i < maxRetries - 1) {
-                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
-                console.log("Runing stack.cancel")
-                await stack.cancel();
-                console.log("Runing stack.cancel done")
-                await new Promise(resolve => setTimeout(resolve, interval));
-            } else {
-                throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
+                throw new Error(`Action failed after ${maxRetries} attempts! Error: ${err}`);
             }
         }
     }
@@ -122,7 +101,9 @@ const executeCleanup = async () => {
         
         console.log(JSON.stringify(stacks));
         
-        stacks.forEach(async stack => await handleStack(stack, pulumi.getProject()));
+        for (const stack of stacks) {
+            await handleStack(stack, pulumi.getProject());
+        }
         
         console.log('Done executing cleanup');
     } catch (err) {
@@ -137,7 +118,7 @@ async function handleStack(stack, projectName){
             stackName: stack.name,
             program: async () => {}
         })
-        retryDestroy(selectedStack, 10, 30000);
+        await retryAction('destroy', selectedStack.destroy, selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
     }
     console.log(stack.name);
