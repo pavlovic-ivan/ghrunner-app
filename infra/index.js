@@ -103,7 +103,13 @@ async function retryDestroy(stack, maxRetries, interval) {
 
 const executeCleanup = async () => {
     console.log('Executing cleanup');
-    const stacks = await (await LocalWorkspace.create()).listStacks();
+    const ws = await LocalWorkspace.create({
+        envVars: {
+            "AWS_REGION": process.env.AWS_REGION,
+            "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
+        }
+    });
+    const stacks = await ws.listStacks();
     for(let stack in stacks){
         console.log(JSON.stringify(stack));
     }
