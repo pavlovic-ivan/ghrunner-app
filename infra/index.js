@@ -120,7 +120,7 @@ async function handleStack(stack, projectName){
                 program: async () => {}
             })
         } catch(err){
-            console.log(`Error occured while selecting a stack. Error: ${JSON.stringify(err)}`);
+            console.log(`Error occured while selecting a stack. Error: ${err}`);
         }
         await retryAction('destroy', selectedStack.destroy, selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
