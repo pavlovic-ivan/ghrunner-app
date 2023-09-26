@@ -107,17 +107,21 @@ const executeCleanup = async () => {
         
         console.log('Done executing cleanup');
     } catch (err) {
-        console.log(`Error occured while executing cleanup. Error: ${JSON.stringify(err)}`);
+        console.log(`Error occured while executing cleanup. Error: ${err}`);
     }
 }
 
 async function handleStack(stack, projectName){
     if(isMoreThanOneHourOld(stack.lastUpdate)){
         console.log(`Stack [${stack.name}] is more than an hour long. Deleting the stack now`);
-        const selectedStack = await LocalWorkspace.selectStack({
-            stackName: stack.name,
-            program: async () => {}
-        })
+        try {
+            const selectedStack = await LocalWorkspace.selectStack({
+                stackName: stack.name,
+                program: async () => {}
+            })
+        } catch(err){
+            console.log(`Error occured while selecting a stack. Error: ${JSON.stringify(err)}`);
+        }
         await retryAction('destroy', selectedStack.destroy, selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
     }
