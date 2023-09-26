@@ -117,10 +117,17 @@ const executeCleanup = async () => {
             "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
         }
     });
-    const stacks = await ws.listStacks();
+    const stacks = (await ws.listStacks()).map(s => {
+        stackName = s.name,
+        lastUpdate = s.lastUpdate,
+        updateInProgress = s.updateInProgress,
+        resourceCount = s.resourceCount
+    });
     console.log('----');
     console.log(JSON.stringify(stacks));
-    stacks.map(s => s.name).forEach(name => console.log(name));
+    for(let stack in stacks){
+        console.log(stack.name);
+    }
     console.log('----');
     console.log('Done executing cleanup');
 }
