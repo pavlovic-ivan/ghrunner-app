@@ -1,4 +1,5 @@
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
+import * as pulumi from "@pulumi/pulumi";
 const aws = require("@pulumi/aws");
 const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
@@ -104,6 +105,13 @@ async function retryDestroy(stack, maxRetries, interval) {
 const executeCleanup = async () => {
     console.log('Executing cleanup');
     const ws = await LocalWorkspace.create({
+        projectSettings: {
+            name: pulumi.getProject(),
+            runtime: "nodejs",
+            backend: {
+                url: process.env.PULUMI_BACKEND_URL
+            }
+        },
         envVars: {
             "AWS_REGION": process.env.AWS_REGION,
             "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
