@@ -122,7 +122,7 @@ const executeCleanup = async () => {
     console.log(stacks);
     console.log('----');
     for(let stack in stacks){
-        console.log(JSON.stringify(stack));
+        console.log(stack.name);
     }
     console.log('Done executing cleanup');
 }
