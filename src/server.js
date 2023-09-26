@@ -8,12 +8,7 @@ let initialized = false;
 let probot;
 
 exports.handler = async function (event, context) {
-    console.log('--- Show context');
-    console.log(JSON.stringify(context));
-    console.log('--- End show context');
-    console.log('--- Show event');
-    console.log(JSON.stringify(event));
-    console.log('--- End show event');
+    // for scheduled call, no use from context, use event: {"version":"0","id":"dd651195-37b8-464f-ad01-9fd0e5e952f7","detail-type":"Scheduled Event","source":"aws.scheduler","account":"481267683326","time":"2023-09-25T14:12:07Z","region":"us-east-1","resources":["arn:aws:scheduler:us-east-1:481267683326:schedule/default/GHAppWebhookConsumerLambdaScheduleEvent"],"detail":"{}"}
     try {
         if (!initialized){
             const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
