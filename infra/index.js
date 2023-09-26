@@ -121,16 +121,20 @@ const executeCleanup = async () => {
     
     console.log(JSON.stringify(stacks));
     
-    stacks.forEach(async stack => await handleStack(stack));
+    stacks.forEach(async stack => await handleStack(stack, pulumi.getProject()));
     
     console.log('Done executing cleanup');
 }
 
-async function handleStack(stack){
+async function handleStack(stack, projectName){
     if(isMoreThanOneHourOld(stack.lastUpdate)){
         console.log(`Stack [${stack.name}] is more than an hour long. Deleting the stack now`);
         const selectedStack = await LocalWorkspace.selectStack({
-            stackName: stack.name
+            stackName: stack.name,
+            projectSettings: {
+                name: projectName,
+                runtime: "nodejs",
+            }
         })
         retryDestroy(selectedStack, 10, 30000);
         console.log(`Stack [${stack.name}] deleted`);
@@ -141,7 +145,7 @@ async function handleStack(stack){
 function isMoreThanOneHourOld(lastUpdate) {
     const lastUpdateDate = new Date(lastUpdate);
     const currentDate = new Date();
-   const timeDifference = currentDate - lastUpdateDate;
+    const timeDifference = currentDate - lastUpdateDate;
     return timeDifference > 3_600_000;
 }
 
