@@ -121,13 +121,27 @@ const executeCleanup = async () => {
     
     console.log(JSON.stringify(stacks));
     
-    stacks.forEach(stack => handleStack(stack));
+    stacks.forEach(async stack => await handleStack(stack));
     
     console.log('Done executing cleanup');
 }
 
-function handleStack(stack){
+async function handleStack(stack){
+    if(isMoreThanOneHourOld(stack.lastUpdate)){
+        console.log(`Stack [${stack.name}] is more than an hour long. Deleting the stack now`);
+        const selectedStack = await LocalWorkspace.selectStack({
+            stackName: stack.name
+        })
+        retryDestroy(selectedStack, 10, 30000);
+    }
     console.log(stack.name);
+}
+
+function isMoreThanOneHourOld(lastUpdate) {
+    const lastUpdateDate = new Date(lastUpdate);
+    const currentDate = new Date();
+   const timeDifference = currentDate - lastUpdateDate;
+    return timeDifference > 3_600_000;
 }
 
 module.exports = {
