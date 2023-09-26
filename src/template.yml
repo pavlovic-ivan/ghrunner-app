@@ -52,6 +52,7 @@ Resources:
             Method: POST
         ScheduleEvent:
           Type: ScheduleV2
+          Name: PulumiCleanupScheduler
           Properties:
             ScheduleExpression: "rate(1 minute)"
       Environment:
