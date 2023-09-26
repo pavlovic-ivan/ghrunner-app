@@ -133,6 +133,7 @@ async function handleStack(stack){
             stackName: stack.name
         })
         retryDestroy(selectedStack, 10, 30000);
+        console.log(`Stack [${stack.name}] deleted`);
     }
     console.log(stack.name);
 }
