@@ -119,11 +119,9 @@ const executeCleanup = async () => {
     });
     const stacks = await ws.listStacks();
     console.log('----');
-    console.log(stacks);
+    console.log(JSON.stringify(stacks));
+    stacks.map(s => s.name).forEach(name => console.log(name));
     console.log('----');
-    for(let stack in stacks){
-        console.log(stack.name);
-    }
     console.log('Done executing cleanup');
 }
 
