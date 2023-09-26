@@ -118,12 +118,16 @@ const executeCleanup = async () => {
         }
     });
     const stacks = await ws.listStacks();
-    console.log('----');
+    
     console.log(JSON.stringify(stacks));
-    stacks.forEach(stack => console.log(stack.name));
-    console.log('----');
+    
+    stacks.forEach(stack => handleStack(stack));
     
     console.log('Done executing cleanup');
+}
+
+function handleStack(stack){
+    console.log(stack.name);
 }
 
 module.exports = {
