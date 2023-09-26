@@ -118,12 +118,12 @@ async function handleStack(stack, projectName){
             const selectedStack = await LocalWorkspace.selectStack({
                 stackName: stack.name,
                 program: async () => {}
-            })
+            });
+            await retryAction('destroy', selectedStack.destroy, selectedStack);
+            console.log(`Stack [${stack.name}] deleted`);
         } catch(err){
             console.log(`Error occured while selecting a stack. Error: ${err}`);
         }
-        await retryAction('destroy', selectedStack.destroy, selectedStack);
-        console.log(`Stack [${stack.name}] deleted`);
     }
     console.log(stack.name);
 }
