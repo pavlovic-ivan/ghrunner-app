@@ -103,27 +103,31 @@ async function retryDestroy(stack, maxRetries, interval) {
 }
 
 const executeCleanup = async () => {
-    console.log('Executing cleanup');
-    const ws = await LocalWorkspace.create({
-        projectSettings: {
-            name: pulumi.getProject(),
-            runtime: "nodejs",
-            backend: {
-                url: process.env.PULUMI_BACKEND_URL
+    try {
+        console.log('Executing cleanup');
+        const ws = await LocalWorkspace.create({
+            projectSettings: {
+                name: pulumi.getProject(),
+                runtime: "nodejs",
+                backend: {
+                    url: process.env.PULUMI_BACKEND_URL
+                }
+            },
+            envVars: {
+                "AWS_REGION": process.env.AWS_REGION,
+                "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
-        },
-        envVars: {
-            "AWS_REGION": process.env.AWS_REGION,
-            "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
-        }
-    });
-    const stacks = await ws.listStacks();
-    
-    console.log(JSON.stringify(stacks));
-    
-    stacks.forEach(async stack => await handleStack(stack, pulumi.getProject()));
-    
-    console.log('Done executing cleanup');
+        });
+        const stacks = await ws.listStacks();
+        
+        console.log(JSON.stringify(stacks));
+        
+        stacks.forEach(async stack => await handleStack(stack, pulumi.getProject()));
+        
+        console.log('Done executing cleanup');
+    } catch (err) {
+        console.log(`Error occured while executing cleanup. Error: ${err}`);
+    }
 }
 
 async function handleStack(stack, projectName){
@@ -131,10 +135,7 @@ async function handleStack(stack, projectName){
         console.log(`Stack [${stack.name}] is more than an hour long. Deleting the stack now`);
         const selectedStack = await LocalWorkspace.selectStack({
             stackName: stack.name,
-            projectSettings: {
-                name: projectName,
-                runtime: "nodejs",
-            }
+            program: async () => {}
         })
         retryDestroy(selectedStack, 10, 30000);
         console.log(`Stack [${stack.name}] deleted`);
