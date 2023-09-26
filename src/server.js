@@ -10,7 +10,6 @@ let probot;
 exports.handler = async function (event, context) {
     try {
         if(event.hasOwnProperty("source") && event.source === "aws.scheduler"){
-            console.log(JSON.stringify(event));
             await executeCleanup();
         } else {
             const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
