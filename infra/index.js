@@ -1,5 +1,5 @@
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
-import * as pulumi from "@pulumi/pulumi";
+const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
