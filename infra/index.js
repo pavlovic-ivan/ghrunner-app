@@ -101,6 +101,15 @@ async function retryDestroy(stack, maxRetries, interval) {
     }
 }
 
+const executeCleanup = async () => {
+    console.log('Executing cleanup');
+    const stacks = await (await LocalWorkspace.create()).listStacks();
+    for(let stack in stacks){
+        console.log(JSON.stringify(stack));
+    }
+    console.log('Done executing cleanup');
+}
+
 module.exports = {
-    createOrDelete
+    createOrDelete, executeCleanup
 }
