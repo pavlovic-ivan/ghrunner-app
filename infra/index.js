@@ -118,6 +118,9 @@ const executeCleanup = async () => {
         }
     });
     const stacks = await ws.listStacks();
+    console.log('----');
+    console.log(stacks);
+    console.log('----');
     for(let stack in stacks){
         console.log(JSON.stringify(stack));
     }
