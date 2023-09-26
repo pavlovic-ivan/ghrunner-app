@@ -107,7 +107,7 @@ const executeCleanup = async () => {
         
         console.log('Done executing cleanup');
     } catch (err) {
-        console.log(`Error occured while executing cleanup. Error: ${err}`);
+        console.log(`Error occured while executing cleanup. Error: ${JSON.stringify(err)}`);
     }
 }
 
