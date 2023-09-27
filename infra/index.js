@@ -5,6 +5,7 @@ const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
 
+
 const createOrDelete = async (context, action, stackName, config) => {
     console.log('About to create/delete infra');
 
@@ -41,28 +42,64 @@ const createOrDelete = async (context, action, stackName, config) => {
     
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
 
-    let stackConfig = await stack.getAllConfig();
-
     console.info("refreshing stack...");
-    await stack.refresh();
+    await retryRefresh(stack, 10, 30000);
     console.info("refresh complete");
-    console.info("refresh complete again");
 
     switch(action){
         case "completed":
-            console.info("destroying stack...");
-            await stack.destroy();
-            console.info("stack destroy complete");
+            console.info("Attempting to destroy stack...");
+            await retryDestroy(stack, 10, 30000);
             break;
         case "requested":
             console.info("updating stack...");
-            await stack.up({ onOutput: console.debug });
+            await stack.up({ onOutput: console.info });
             console.info("updating stack complete");
             break;
         default:
             throw new Error(`Unknown action received! Got: [${action}]`);
     }
 };
+
+async function retryRefresh(stack, maxRetries, interval) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            await stack.refresh();
+            console.info("stack refresh complete");
+            return;
+        } catch (err) {
+            if (i < maxRetries - 1) {
+                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                console.log("Runing stack.cancel")
+                await stack.cancel();
+                console.log("Runing stack.cancel done")
+                await new Promise(resolve => setTimeout(resolve, interval));
+            } else {
+                throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
+            }
+        }
+    }
+}
+
+async function retryDestroy(stack, maxRetries, interval) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            await stack.destroy();
+            console.info("stack destroy complete");
+            return;
+        } catch (err) {
+            if (i < maxRetries - 1) {
+                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                console.log("Runing stack.cancel")
+                await stack.cancel();
+                console.log("Runing stack.cancel done")
+                await new Promise(resolve => setTimeout(resolve, interval));
+            } else {
+                throw new Error(`The function execution failed after ${maxRetries} attempts! Error: ${err}`);
+            }
+        }
+    }
+}
 
 module.exports = {
     createOrDelete
