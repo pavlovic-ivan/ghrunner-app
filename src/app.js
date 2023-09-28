@@ -11,7 +11,7 @@ const probotApp = async (app) => {
     if(Array.isArray(context.payload.workflow_job.labels) && context.payload.workflow_job.labels.length > 0){
       var labels = context.payload.workflow_job.labels.join(',');
 
-      const configPerLabel = convertYamlToJson('config.yml')
+      const configPerLabel = convertYamlToJson(process.env.RUN_CTX === 'test' ? 'config.test.yml' : 'config.yml')
 
       if(configPerLabel.hasOwnProperty(labels)){
         console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}]. Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
