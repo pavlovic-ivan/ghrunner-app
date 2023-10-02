@@ -1,8 +1,8 @@
 FROM public.ecr.aws/lambda/nodejs:16
 
-# ENV PATH="/root/.pulumi/bin:${PATH}"
+ARG PULUMI_VERSION=3.61.0
 RUN yum install tar gzip -y \
-    && curl -fsSL https://get.pulumi.com | sh \
+    && curl -fsSL https://get.pulumi.com | sh -s -- --version $PULUMI_VERSION \
     && mv ~/.pulumi/bin/* /bin/ \
     && pulumi version --non-interactive
 
