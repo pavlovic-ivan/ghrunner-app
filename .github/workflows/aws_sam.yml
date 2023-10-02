@@ -42,10 +42,13 @@ jobs:
         with:
           node-version: 16
           cache: npm
+      
       - name: Build docker image
         run: npm run build
+        env:
+          PULUMI_VERSION: ${{ vars.PULUMI_VERSION }}
 
-      - uses: aws-actions/configure-aws-credentials@v1.7.0
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
