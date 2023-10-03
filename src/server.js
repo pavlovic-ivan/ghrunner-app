@@ -10,6 +10,10 @@ let probot;
 exports.handler = async function (event, context) {
     try {
         if(event.hasOwnProperty("source") && event.source === "aws.scheduler"){
+            const [pulumiPassphrase] = await Promise.all([
+                getSecretValue('pulumiPassphrase'),
+            ]);
+            process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
             await executeCleanup();
         } else {
             const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
