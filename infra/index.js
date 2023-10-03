@@ -120,7 +120,7 @@ async function handleStack(stack, projectName){
         try {
             const selectedStack = await LocalWorkspace.selectStack({
                 stackName: stack.name,
-                projectName: projectName,
+                projectName: stackNameParts[1],
                 program: async () => {}
             });
             await retryAction('destroy', selectedStack.destroy, selectedStack);
