@@ -112,7 +112,7 @@ const executeCleanup = async () => {
 }
 
 async function handleStack(stack, projectName){
-    console.log(`Echo: ${stack}, ${projectName}`);
+    console.log(`Echo: ${JSON.stringify(stack)}, ${projectName}`);
     if(isMoreThanOneHourOld(stack.lastUpdate)){
         console.log(`Stack [${stack.name}] is more than an hour long. Deleting the stack now`);
         try {
