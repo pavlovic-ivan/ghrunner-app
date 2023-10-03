@@ -71,6 +71,7 @@ async function retryAction(actionName, action, stack, maxRetries = RETRY_MAX, in
         } catch (err) {
             if (i < maxRetries - 1) {
                 console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                console.log(`Error is: ${err}`);
                 await stack.cancel();
                 console.log("Action cancelled");
                 await new Promise(resolve => setTimeout(resolve, interval));
