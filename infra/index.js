@@ -65,6 +65,8 @@ const createOrDelete = async (context, action, stackName, config) => {
 async function retryAction(actionName, action, stack, maxRetries = RETRY_MAX, interval = RETRY_INTERVAL) {
     for (let i = 0; i < maxRetries; i++) {
         try {
+            console.log(`Action: ${action}`);
+            console.log(`Stack: ${stack}`);
             await action();
             console.info(`Action [${actionName}] complete`);
             return;
