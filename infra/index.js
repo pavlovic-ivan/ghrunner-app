@@ -119,6 +119,12 @@ const executeCleanup = async () => {
             }
         });
         const stacks = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack));
+        
+        if(stacks.length === 0){
+            console.log('Nothing to delete. Skipping...');
+            return;
+        }
+
         console.log(`Stacks to delete: ${JSON.stringify(stacks)}`);
 
         Promise.all(stacks.map(stack => handleStack(stack)))
