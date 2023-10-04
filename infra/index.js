@@ -118,7 +118,7 @@ const executeCleanup = async () => {
                 "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
         });
-        const stacks = await ws.listStacks();
+        const stacks = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack));
         for (const stack of stacks) {
             await handleStack(stack);
         }

@@ -56,7 +56,7 @@ Resources:
         ScheduleEvent:
           Type: ScheduleV2
           Properties:
-            ScheduleExpression: "rate(1 minute)"
+            ScheduleExpression: "rate(15 minute)"
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
