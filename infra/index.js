@@ -119,9 +119,16 @@ const executeCleanup = async () => {
             }
         });
         const stacks = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack));
-        for (const stack of stacks) {
-            await handleStack(stack);
-        }
+        console.log(`Stacks to delete: ${JSON.stringify(stacks)}`);
+
+        Promise.all(stacks.map(stack => handleStack(stack)))
+            .then(results => {
+                console.log('All stacks destroyed:', results);
+            })
+            .catch(error => {
+                console.error('Error destroying stacks:', error);
+            });
+
         console.log('Executing cleanup done');
     } catch (err) {
         console.log(`Error occured while executing cleanup. Error: ${err}`);
@@ -129,20 +136,18 @@ const executeCleanup = async () => {
 }
 
 async function handleStack(stack){
-    let stackNameParts = stack.name.split('/');    
-    if(shouldDeleteStack(stack)){
-        console.log(`Stack [${stack.name}] is more than an hour old. Deleting the stack now`);
-        try {
-            const selectedStack = await LocalWorkspace.selectStack({
-                stackName: stack.name,
-                projectName: stackNameParts[1],
-                program: async () => {}
-            });
-            await retryDestroy(selectedStack);
-            console.log(`Stack [${stack.name}] deleted`);
-        } catch(err){
-            console.log(`Error occured while selecting a stack. Error: ${err}`);
-        }
+    let stackNameParts = stack.name.split('/');
+    console.log(`Stack [${stack.name}] is more than an ${process.env.MAX_STACK_AGE_IN_MINUTES} minutes old. Deleting the stack now`);
+    try {
+        const selectedStack = await LocalWorkspace.selectStack({
+            stackName: stack.name,
+            projectName: stackNameParts[1],
+            program: async () => {}
+        });
+        await retryDestroy(selectedStack);
+        console.log(`Stack [${stack.name}] deleted`);
+    } catch(err){
+        console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
 }
 
