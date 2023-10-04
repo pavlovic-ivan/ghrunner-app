@@ -8,7 +8,7 @@ const { fetchToken } = require("./token-fetcher");
 
 const RETRY_MAX = 10;
 const RETRY_INTERVAL = 30000;
-const HOUR_IN_MS = 3_600_000;
+const MAX_STACK_AGE_IN_MILLIS = (process.env.MAX_STACK_AGE_IN_MINUTES * 60 * 1000)
 
 const createOrDelete = async (context, action, stackName, config) => {
     console.log('About to create/delete infra');
@@ -52,7 +52,7 @@ const createOrDelete = async (context, action, stackName, config) => {
 
     if (action === "completed") {
         console.info("Attempting to destroy stack...");
-        await retryDestroy('destroy', stack.destroy, stack);
+        await retryDestroy(stack);
     } else if (action === "requested") {
         console.info("updating stack...");
         await stack.up({ onOutput: console.info });
@@ -119,46 +119,46 @@ const executeCleanup = async () => {
             }
         });
         const stacks = await ws.listStacks();
-        
-        console.log(JSON.stringify(stacks));
-        
         for (const stack of stacks) {
-            await handleStack(stack, pulumi.getProject());
+            await handleStack(stack);
         }
-        
-        console.log('Done executing cleanup');
+        console.log('Executing cleanup done');
     } catch (err) {
         console.log(`Error occured while executing cleanup. Error: ${err}`);
     }
 }
 
-async function handleStack(stack, projectName){
-    let stackNameParts = stack.name.split('/');
-    console.log(`Echo: ${JSON.stringify(stack)}, ${projectName}. ${stackNameParts}`);
-    
-    if(isMoreThanOneHourOld(stack.lastUpdate)){
-        console.log(`Stack [${stack.name}] is more than an hour long. Deleting the stack now`);
+async function handleStack(stack){
+    let stackNameParts = stack.name.split('/');    
+    if(shouldDeleteStack(stack)){
+        console.log(`Stack [${stack.name}] is more than an hour old. Deleting the stack now`);
         try {
             const selectedStack = await LocalWorkspace.selectStack({
                 stackName: stack.name,
                 projectName: stackNameParts[1],
                 program: async () => {}
             });
-            console.log(`Selected stack: ${JSON.stringify(selectedStack)}`);
-            await retryDestroy('destroy', selectedStack.destroy, selectedStack);
+            await retryDestroy(selectedStack);
             console.log(`Stack [${stack.name}] deleted`);
         } catch(err){
             console.log(`Error occured while selecting a stack. Error: ${err}`);
         }
     }
-    console.log(stack.name);
+}
+
+function shouldDeleteStack(stack){
+    return !isCurrentlyUpdating(stack) && isMoreThanOneHourOld(stack.lastUpdate);
+}
+
+function isCurrentlyUpdating(stack){
+    return stack.updateInProgress;
 }
 
 function isMoreThanOneHourOld(lastUpdate) {
     const lastUpdateDate = new Date(lastUpdate);
     const currentDate = new Date();
     const timeDifference = currentDate - lastUpdateDate;
-    return timeDifference > 3_600_000;
+    return timeDifference > MAX_STACK_AGE_IN_MILLIS;
 }
 
 module.exports = {

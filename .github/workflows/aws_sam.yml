@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - parameterize-pulumi-version
       - test-scheduler
   workflow_dispatch:
 
@@ -58,7 +57,7 @@ jobs:
       
       - name: Push docker image
         env:
-          ECR_REPO: ${{ secrets.ECR_REPO }}  
+          ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPO
           docker tag ghrunner-app-lambda:latest $ECR_REPO/ghrunner-app:latest
@@ -75,4 +74,5 @@ jobs:
           TLS_CERTIFICATE_ARN: ${{ secrets.TLS_CERTIFICATE_ARN }}
           PULUMI_BACKEND_URL: ${{ secrets.PULUMI_BACKEND_URL }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
+          MAX_STACK_AGE_IN_MINUTES: ${{ vars.MAX_STACK_AGE_IN_MINUTES }}
         run: make up

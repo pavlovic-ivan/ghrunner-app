@@ -27,6 +27,9 @@ Parameters:
   timestamp:
     Description: Timestamp of the deployment
     Type: String
+  maxStackAgeInMinutes:
+    Description: Maximum age of Pulumi stack in minutes
+    Type: Number
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -58,6 +61,7 @@ Resources:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
           DEPLOYMENT_TIMESTAMP: !Ref timestamp
+          MAX_STACK_AGE_IN_MINUTES: !Ref maxStackAgeInMinutes
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi
