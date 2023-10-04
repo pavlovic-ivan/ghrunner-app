@@ -84,6 +84,28 @@ async function retryAction(actionName, action, stack, maxRetries = RETRY_MAX, in
     }
 }
 
+async function retryDestroy(actionName, action, stack, maxRetries = RETRY_MAX, interval = RETRY_INTERVAL) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            console.log(`Action: ${action}`);
+            console.log(`Stack: ${stack}`);
+            await stack.destroy();
+            console.info(`Action [${actionName}] complete`);
+            return;
+        } catch (err) {
+            if (i < maxRetries - 1) {
+                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                console.log(`Error is: ${err}`);
+                await stack.cancel();
+                console.log("Action cancelled");
+                await new Promise(resolve => setTimeout(resolve, interval));
+            } else {
+                throw new Error(`Action failed after ${maxRetries} attempts! Error: ${err}`);
+            }
+        }
+    }
+}
+
 const executeCleanup = async () => {
     try {
         console.log('Executing cleanup');
@@ -127,7 +149,7 @@ async function handleStack(stack, projectName){
                 program: async () => {}
             });
             console.log(`Selected stack: ${JSON.stringify(selectedStack)}`);
-            await retryAction('destroy', selectedStack.destroy, selectedStack);
+            await retryDestroy('destroy', selectedStack.destroy, selectedStack);
             console.log(`Stack [${stack.name}] deleted`);
         } catch(err){
             console.log(`Error occured while selecting a stack. Error: ${err}`);
