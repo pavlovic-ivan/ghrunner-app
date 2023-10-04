@@ -124,6 +124,7 @@ async function handleStack(stack, projectName){
                 projectName: stackNameParts[1],
                 program: async () => {}
             });
+            console.log(`Selected stack: ${selectedStack}`);
             await retryAction('destroy', selectedStack.destroy, selectedStack);
             console.log(`Stack [${stack.name}] deleted`);
         } catch(err){
