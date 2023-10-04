@@ -47,12 +47,12 @@ const createOrDelete = async (context, action, stackName, config) => {
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
 
     console.info("refreshing stack...");
-    await retryAction('refresh', stack.refresh, stack);
+    await retryRefresh(stack);
     console.info("refresh complete");
 
     if (action === "completed") {
         console.info("Attempting to destroy stack...");
-        await retryAction('destroy', stack.destroy, stack);
+        await retryDestroy('destroy', stack.destroy, stack);
     } else if (action === "requested") {
         console.info("updating stack...");
         await stack.up({ onOutput: console.info });
@@ -62,13 +62,11 @@ const createOrDelete = async (context, action, stackName, config) => {
     }
 };
 
-async function retryAction(actionName, action, stack, maxRetries = RETRY_MAX, interval = RETRY_INTERVAL) {
+async function retryRefresh(stack, maxRetries = RETRY_MAX, interval = RETRY_INTERVAL) {
     for (let i = 0; i < maxRetries; i++) {
         try {
-            console.log(`Action: ${action}`);
-            console.log(`Stack: ${stack}`);
-            await action();
-            console.info(`Action [${actionName}] complete`);
+            await stack.refresh();
+            console.info(`Refresh complete`);
             return;
         } catch (err) {
             if (i < maxRetries - 1) {
@@ -84,13 +82,11 @@ async function retryAction(actionName, action, stack, maxRetries = RETRY_MAX, in
     }
 }
 
-async function retryDestroy(actionName, action, stack, maxRetries = RETRY_MAX, interval = RETRY_INTERVAL) {
+async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTERVAL) {
     for (let i = 0; i < maxRetries; i++) {
         try {
-            console.log(`Action: ${action}`);
-            console.log(`Stack: ${stack}`);
             await stack.destroy();
-            console.info(`Action [${actionName}] complete`);
+            console.info(`Destroy complete`);
             return;
         } catch (err) {
             if (i < maxRetries - 1) {
