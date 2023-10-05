@@ -30,6 +30,9 @@ Parameters:
   maxStackAgeInMinutes:
     Description: Maximum age of Pulumi stack in minutes
     Type: Number
+  cleanupScheduleExpression:
+    Description: Expression for the rogue instance cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
+    Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -53,10 +56,10 @@ Resources:
             ApiId: !Ref HttpApiGateway
             Path: /ghrunner-app
             Method: POST
-        ScheduleEvent:
+        RogueInstanceScheduledCleanup:
           Type: ScheduleV2
           Properties:
-            ScheduleExpression: "rate(15 minute)"
+            ScheduleExpression: !Ref cleanupScheduleExpression
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl

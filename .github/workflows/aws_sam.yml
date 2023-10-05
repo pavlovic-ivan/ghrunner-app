@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - test-scheduler
+      - add-scheduled-resource-cleanup
   workflow_dispatch:
 
 jobs:
@@ -75,4 +75,5 @@ jobs:
           PULUMI_BACKEND_URL: ${{ secrets.PULUMI_BACKEND_URL }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
           MAX_STACK_AGE_IN_MINUTES: ${{ vars.MAX_STACK_AGE_IN_MINUTES }}
+          ROGUE_INSTANCE_CLEANUP_SCHEDULE: ${{ vars.ROGUE_INSTANCE_CLEANUP_SCHEDULE }}
         run: make up
