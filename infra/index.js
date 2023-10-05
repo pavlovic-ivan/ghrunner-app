@@ -66,7 +66,6 @@ async function retryRefresh(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     for (let i = 0; i < maxRetries; i++) {
         try {
             await stack.refresh();
-            console.info(`Refresh complete`);
             return;
         } catch (err) {
             if (i < maxRetries - 1) {
@@ -86,7 +85,6 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     for (let i = 0; i < maxRetries; i++) {
         try {
             await stack.destroy();
-            console.info(`Destroy complete`);
             return;
         } catch (err) {
             if (i < maxRetries - 1) {
@@ -126,9 +124,7 @@ const executeCleanup = async () => {
         }
 
         console.log(`Stacks to delete: ${JSON.stringify(stacks)}`);
-
-        const results = await Promise.all(stacks.map(stack => handleStack(stack)));
-        console.log(`Results: ${JSON.stringify(results)}`);
+        await Promise.all(stacks.map(stack => handleStack(stack)));
         console.log('Executing cleanup done');
     } catch (err) {
         console.log(`Error occured while executing cleanup. Error: ${err}`);
@@ -137,7 +133,7 @@ const executeCleanup = async () => {
 
 async function handleStack(stack){
     let stackNameParts = stack.name.split('/');
-    console.log(`Stack [${stack.name}] is more than an ${process.env.MAX_STACK_AGE_IN_MINUTES} minutes old. Deleting the stack now`);
+    console.log(`Stack [${stack.name}] is more than ${process.env.MAX_STACK_AGE_IN_MINUTES} minutes old. Deleting the stack now`);
     try {
         const selectedStack = await LocalWorkspace.selectStack({
             stackName: stack.name,
