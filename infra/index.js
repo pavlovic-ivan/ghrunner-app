@@ -5,6 +5,8 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
 
 const RETRY_MAX = 10;
 const RETRY_INTERVAL = 30000;
@@ -142,9 +144,27 @@ async function handleStack(stack){
         });
         await retryDestroy(selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
+        console.log(`Next, removing state files from S3 bucket with AWS SDK`);
+        await removeStateFiles(stack, stackNameParts[2]);
+        console.log('Removing state files done');
     } catch(err){
         console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
+}
+
+async function removeStateFiles(stack, stackName){
+    s3.listObjectsV2({ Bucket: process.env.PULUMI_BACKEND_URL }, (err, data) => {
+        if (err) {
+            console.error('Error:', err);
+            return;
+        }
+    
+        const matchingObjects = data.Contents.filter(object => 
+            object.Key.includes(stackName)
+        );
+    
+        console.log(`List of objects matching the stack name: ${JSON.stringify(matchingObjects)}`);
+    });
 }
 
 function shouldDeleteStack(stack){
