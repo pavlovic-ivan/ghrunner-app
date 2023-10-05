@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - remove-state-files-with-aws-sdk
   workflow_dispatch:
 
 jobs:
