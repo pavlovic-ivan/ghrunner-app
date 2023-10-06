@@ -159,7 +159,7 @@ async function handleStack(stack){
 async function removeStateFiles(stackData){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
     const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
-    const matchingObjects = s3Objects.Contents.filter(object => object.Key.includes(stackData.ghrunnerName));
+    const matchingS3Objects = s3Objects.Contents.filter(s3Object => s3Object.Key.includes(stackData.ghrunnerName));
 
     var params = {
         Bucket: bucket, 
@@ -169,11 +169,11 @@ async function removeStateFiles(stackData){
         }
     };
 
-    matchingObjects.forEach(object => {
-       params.Delete.Objects.push({ Key: oibject.Key }); 
+    matchingS3Objects.forEach(matchingS3Object => {
+       params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
     });
 
-    console.log(`Matching objects: ${JSON.stringify(matchingObjects)}`);
+    console.log(`Matching objects: ${JSON.stringify(matchingS3Objects)}`);
     console.log(`Params: ${JSON.stringify(params)}`);
     // s3.deleteObjects()
 
