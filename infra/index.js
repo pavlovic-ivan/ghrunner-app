@@ -175,7 +175,8 @@ async function removeStateFiles(stackData){
 
     console.log(`Matching objects: ${JSON.stringify(matchingS3Objects)}`);
     console.log(`Params: ${JSON.stringify(params)}`);
-    // s3.deleteObjects()
+    const deleteObjectsResult = await s3.deleteObjects(params).promise();
+    console.log(`Delete objects result for stack [${stackData.ghrunnerName}]: ${JSON.stringify(deleteObjectsResult)}`);
 
     // console.log(`Deleting pulumi history for [${stackData.ghrunnerName}]`);
     // const resultHistory = await s3.deleteObject({ 
