@@ -161,7 +161,7 @@ async function removeStateFiles(stackData){
     const result = await s3.listObjectsV2({ 
         Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
         Prefix: `.pulumi/backups/${stackData.repo}`
-    });
+    }).promise();
     console.log(`Got result from using await: ${JSON.stringify(result)}`);
 
     // console.log('Get backups');
