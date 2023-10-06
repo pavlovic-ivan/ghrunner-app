@@ -175,7 +175,12 @@ async function removeStateFiles(stackData){
         }
     };
 
+    matchingObjects.forEach(object => {
+       params.Delete.Objects.push({ Key: oibject.Key }); 
+    });
+
     console.log(`Matching objects: ${JSON.stringify(matchingObjects)}`);
+    console.log(`Params: ${JSON.stringify(params)}`);
     // s3.deleteObjects()
 
     // console.log(`Deleting pulumi history for [${stackData.ghrunnerName}]`);
