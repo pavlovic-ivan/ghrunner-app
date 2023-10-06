@@ -153,7 +153,7 @@ async function handleStack(stack){
 }
 
 async function removeStateFiles(stack, stackName){
-    s3.listObjectsV2({ Bucket: process.env.PULUMI_BACKEND_URL }, (err, data) => {
+    s3.listObjectsV2({ Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '') }, (err, data) => {
         if (err) {
             console.error('Error:', err);
             return;
