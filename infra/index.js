@@ -160,21 +160,21 @@ async function removeStateFiles(stackData){
     console.log(`Deleting pulumi backups for [${stackData.ghrunnerName}]`);
     const resultBackups = await s3.deleteObject({ 
         Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-        Key: `.pulumi/backups/${stackData.repo}/${stackData.ghrunnerName}`
+        Key: `.pulumi/backups/${stackData.repo}/${stackData.ghrunnerName}/*`
     }).promise();
     console.log(`Deleting pulumi backups result: ${JSON.stringify(resultBackups)}`);
 
     console.log(`Deleting pulumi history for [${stackData.ghrunnerName}]`);
     const resultHistory = await s3.deleteObject({ 
         Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-        Key: `.pulumi/history/${stackData.repo}/${stackData.ghrunnerName}`
+        Key: `.pulumi/history/${stackData.repo}/${stackData.ghrunnerName}/*`
     }).promise();
     console.log(`Deleting pulumi history result: ${JSON.stringify(resultHistory)}`);
 
     console.log(`Deleting pulumi stacks for [${stackData.ghrunnerName}]`);
     const resultStacks = await s3.deleteObject({ 
         Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-        Key: `.pulumi/stacks/${stackData.repo}/${stackData.ghrunnerName}`
+        Key: `.pulumi/stacks/${stackData.repo}/${stackData.ghrunnerName}/*`
     }).promise();
     console.log(`Deleting pulumi stacks result: ${JSON.stringify(resultStacks)}`);
 
