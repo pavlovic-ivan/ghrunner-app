@@ -145,26 +145,47 @@ async function handleStack(stack){
         await retryDestroy(selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
         console.log(`Next, removing state files from S3 bucket with AWS SDK`);
-        await removeStateFiles(stack, stackNameParts[2]);
+        await removeStateFiles({
+            fullStakName: stack.name,
+            repo: stackNameParts[1],
+            ghrunnerName: stackNameParts[2]
+        });
         console.log('Removing state files done');
     } catch(err){
         console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
 }
 
-async function removeStateFiles(stack, stackName){
-    s3.listObjectsV2({ Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '') }, (err, data) => {
-        if (err) {
-            console.error('Error:', err);
-            return;
-        }
-    
-        const matchingObjects = data.Contents.filter(object => 
-            object.Key.includes(stackName)
-        );
-    
-        console.log(`List of objects matching the stack name: ${JSON.stringify(matchingObjects)}`);
+async function removeStateFiles(stackData){
+    console.log('Get backups');
+    s3.listObjectsV2({ 
+        Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
+        Prefix: `.pulumi/backups/${stackData.repo}`
+    }, (err, data) => {
+        if (err) { console.error('Error:', err) }
+        else { console.log(`Backups result: ${JSON.stringify(data)}`) }
     });
+
+    console.log('Get history');
+    s3.listObjectsV2({ 
+        Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
+        Prefix: `.pulumi/history/${stackData.repo}`
+    }, (err, data) => {
+        if (err) { console.error('Error:', err) }
+        else { console.log(`History result: ${JSON.stringify(data)}`) }
+    });
+
+    console.log('Get stacks');
+    s3.listObjectsV2({ 
+        Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
+        Prefix: `.pulumi/stacks/${stackData.repo}`
+    }, (err, data) => {
+        if (err) { console.error('Error:', err) }
+        else { console.log(`Stacks result: ${JSON.stringify(data)}`) }
+    });
+    // const matchingObjects = data.Contents.filter(object => 
+    //     object.Key.includes(stackData.ghrunnerName)
+    // );
 }
 
 function shouldDeleteStack(stack){
