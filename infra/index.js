@@ -157,32 +157,41 @@ async function handleStack(stack){
 }
 
 async function removeStateFiles(stackData){
-    console.log('Get backups');
-    s3.listObjectsV2({ 
+    console.log('Get backups using await');
+    const result = await s3.listObjectsV2({ 
         Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
         Prefix: `.pulumi/backups/${stackData.repo}`
-    }, (err, data) => {
-        if (err) { console.error('Error:', err) }
-        else { console.log(`Backups result: ${JSON.stringify(data)}`) }
     });
+    console.log(`Got result from using await: ${JSON.stringify(result)}`);
 
-    console.log('Get history');
-    s3.listObjectsV2({ 
-        Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-        Prefix: `.pulumi/history/${stackData.repo}`
-    }, (err, data) => {
-        if (err) { console.error('Error:', err) }
-        else { console.log(`History result: ${JSON.stringify(data)}`) }
-    });
+    // console.log('Get backups');
+    // s3.listObjectsV2({ 
+    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
+    //     Prefix: `.pulumi/backups/${stackData.repo}`
+    // }, (err, data) => {
+    //     if (err) { console.error('Error:', err) }
+    //     else { console.log(`Backups result: ${JSON.stringify(data)}`) }
+    // });
 
-    console.log('Get stacks');
-    s3.listObjectsV2({ 
-        Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-        Prefix: `.pulumi/stacks/${stackData.repo}`
-    }, (err, data) => {
-        if (err) { console.error('Error:', err) }
-        else { console.log(`Stacks result: ${JSON.stringify(data)}`) }
-    });
+    // console.log('Get history');
+    // s3.listObjectsV2({ 
+    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
+    //     Prefix: `.pulumi/history/${stackData.repo}`
+    // }, (err, data) => {
+    //     if (err) { console.error('Error:', err) }
+    //     else { console.log(`History result: ${JSON.stringify(data)}`) }
+    // });
+
+    // console.log('Get stacks');
+    // s3.listObjectsV2({ 
+    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
+    //     Prefix: `.pulumi/stacks/${stackData.repo}`
+    // }, (err, data) => {
+    //     if (err) { console.error('Error:', err) }
+    //     else { console.log(`Stacks result: ${JSON.stringify(data)}`) }
+    // });
+
+
     // const matchingObjects = data.Contents.filter(object => 
     //     object.Key.includes(stackData.ghrunnerName)
     // );
