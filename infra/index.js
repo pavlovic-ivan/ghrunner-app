@@ -174,7 +174,12 @@ async function removeStateFiles(stackData){
     });
 
     const deleteObjectsResult = await s3.deleteObjects(params).promise();
-    console.log(`Delete objects result for stack [${stackData.ghrunnerName}]: ${JSON.stringify(deleteObjectsResult)}`);
+    if(deleteObjectsResult.Errors.length > 0){
+        console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
+    } else {
+        console.log(`Successfully deleted S3 objects`);
+    }
+    
 }
 
 function shouldDeleteStack(stack){
