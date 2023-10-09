@@ -173,56 +173,8 @@ async function removeStateFiles(stackData){
        params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
     });
 
-    console.log(`Matching objects: ${JSON.stringify(matchingS3Objects)}`);
-    console.log(`Params: ${JSON.stringify(params)}`);
     const deleteObjectsResult = await s3.deleteObjects(params).promise();
     console.log(`Delete objects result for stack [${stackData.ghrunnerName}]: ${JSON.stringify(deleteObjectsResult)}`);
-
-    // console.log(`Deleting pulumi history for [${stackData.ghrunnerName}]`);
-    // const resultHistory = await s3.deleteObject({ 
-    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-    //     Key: `.pulumi/history/${stackData.repo}/${stackData.ghrunnerName}/*`
-    // }).promise();
-    // console.log(`Deleting pulumi history result: ${JSON.stringify(resultHistory)}`);
-
-    // console.log(`Deleting pulumi stacks for [${stackData.ghrunnerName}]`);
-    // const resultStacks = await s3.deleteObject({ 
-    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-    //     Key: `.pulumi/stacks/${stackData.repo}/${stackData.ghrunnerName}/*`
-    // }).promise();
-    // console.log(`Deleting pulumi stacks result: ${JSON.stringify(resultStacks)}`);
-
-    // console.log('Get backups');
-    // s3.listObjectsV2({ 
-    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-    //     Prefix: `.pulumi/backups/${stackData.repo}`
-    // }, (err, data) => {
-    //     if (err) { console.error('Error:', err) }
-    //     else { console.log(`Backups result: ${JSON.stringify(data)}`) }
-    // });
-
-    // console.log('Get history');
-    // s3.listObjectsV2({ 
-    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-    //     Prefix: `.pulumi/history/${stackData.repo}`
-    // }, (err, data) => {
-    //     if (err) { console.error('Error:', err) }
-    //     else { console.log(`History result: ${JSON.stringify(data)}`) }
-    // });
-
-    // console.log('Get stacks');
-    // s3.listObjectsV2({ 
-    //     Bucket: process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, ''),
-    //     Prefix: `.pulumi/stacks/${stackData.repo}`
-    // }, (err, data) => {
-    //     if (err) { console.error('Error:', err) }
-    //     else { console.log(`Stacks result: ${JSON.stringify(data)}`) }
-    // });
-
-
-    // const matchingObjects = data.Contents.filter(object => 
-    //     object.Key.includes(stackData.ghrunnerName)
-    // );
 }
 
 function shouldDeleteStack(stack){
