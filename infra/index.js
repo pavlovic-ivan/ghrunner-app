@@ -5,6 +5,8 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
 
 const RETRY_MAX = 10;
 const RETRY_INTERVAL = 30000;
@@ -142,9 +144,42 @@ async function handleStack(stack){
         });
         await retryDestroy(selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
+        console.log(`Next, removing state files from S3 bucket with AWS SDK`);
+        await removeStateFiles({
+            fullStakName: stack.name,
+            repo: stackNameParts[1],
+            ghrunnerName: stackNameParts[2]
+        });
+        console.log('Removing state files done');
     } catch(err){
         console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
+}
+
+async function removeStateFiles(stackData){
+    const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
+    const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
+    const matchingS3Objects = s3Objects.Contents.filter(s3Object => s3Object.Key.includes(stackData.ghrunnerName));
+
+    var params = {
+        Bucket: bucket, 
+        Delete: {
+            Objects: [], 
+            Quiet: false
+        }
+    };
+
+    matchingS3Objects.forEach(matchingS3Object => {
+       params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
+    });
+
+    const deleteObjectsResult = await s3.deleteObjects(params).promise();
+    if(deleteObjectsResult.Errors.length > 0){
+        console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
+    } else {
+        console.log(`Successfully deleted S3 objects`);
+    }
+    
 }
 
 function shouldDeleteStack(stack){
