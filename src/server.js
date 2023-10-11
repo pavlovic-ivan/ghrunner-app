@@ -1,5 +1,5 @@
 const { SecretsManager } = require("@aws-sdk/client-secrets-manager");
-const { Probot } = require('probot');
+const { Probot, ProbotOctokit } = require('probot');
 const probotApp = require("./app");
 const { executeCleanup } = require("../infra");
 const lowercaseKeys = require("lowercase-keys");
@@ -9,20 +9,24 @@ let probot;
 
 exports.handler = async function (event, context) {
     try {
+
+        const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
+            getSecretValue('appId'),
+            getSecretValue('privateKey'),
+            getSecretValue('webhookSecret'),
+            getSecretValue('pulumiPassphrase'),
+        ]);
+        process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
+
         if(event.hasOwnProperty("source") && event.source === "aws.scheduler"){
-            const [pulumiPassphrase] = await Promise.all([
-                getSecretValue('pulumiPassphrase'),
-            ]);
-            process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
-            await executeCleanup();
+            const octokit = new ProbotOctokit({
+                auth: {
+                    appId: appId,
+                    privateKey: privateKey
+                }
+            });
+            await executeCleanup(octokit);
         } else {
-            const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
-                getSecretValue('appId'),
-                getSecretValue('privateKey'),
-                getSecretValue('webhookSecret'),
-                getSecretValue('pulumiPassphrase'),
-            ]);
-            process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
             probot = new Probot({ appId, privateKey, secret });
             await probot.load(probotApp);
     

@@ -102,9 +102,10 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     }
 }
 
-const executeCleanup = async () => {
+const executeCleanup = async (octokit) => {
     try {
         console.log('Executing cleanup');
+        console.log(`Got octokit: ${JSON.stringify(octokit)}`);
         const ws = await LocalWorkspace.create({
             projectSettings: {
                 name: pulumi.getProject(),
@@ -134,23 +135,24 @@ const executeCleanup = async () => {
 }
 
 async function handleStack(stack){
-    let stackNameParts = stack.name.split('/');
+    const organisedStackName = getOrganisedStackName(stack);
     console.log(`Stack [${stack.name}] is more than ${process.env.MAX_STACK_AGE_IN_MINUTES} minutes old. Deleting the stack now`);
     try {
         const selectedStack = await LocalWorkspace.selectStack({
             stackName: stack.name,
-            projectName: stackNameParts[1],
+            projectName: organisedStackName.repo,
             program: async () => {}
         });
         await retryDestroy(selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
-        console.log(`Next, removing state files from S3 bucket with AWS SDK`);
-        await removeStateFiles({
-            fullStakName: stack.name,
-            repo: stackNameParts[1],
-            ghrunnerName: stackNameParts[2]
-        });
-        console.log('Removing state files done');
+
+        // console.log(`Next, removing state files from S3 bucket with AWS SDK`); TODO: will be a part of the next PR and removed here as well
+        // await removeStateFiles({
+        //     fullStakName: stack.name,
+        //     repo: organisedStackName.repo,
+        //     ghrunnerName: organisedStackName.runner
+        // });
+        // console.log('Removing state files done');
     } catch(err){
         console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
@@ -183,14 +185,28 @@ async function removeStateFiles(stackData){
 }
 
 function shouldDeleteStack(stack){
-    return !isCurrentlyUpdating(stack) && isMoreThanOneHourOld(stack.lastUpdate);
+    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(stack);
 }
 
 function isCurrentlyUpdating(stack){
     return stack.updateInProgress;
 }
 
-function isMoreThanOneHourOld(lastUpdate) {
+function runnerIsBusy(stack){
+    const organisedStackName = getOrganisedStackName(stack);
+
+}
+
+function getOrganisedStackName(stack){
+    let stackNameComponents = stack.name.split('/');
+    return {
+        root: stackNameComponents[0],
+        repo: stackNameComponents[1],
+        runner: stackNameComponents[2]
+    };
+}
+
+function isOlderThanMaxStackAgeInMillis(lastUpdate) {
     const lastUpdateDate = new Date(lastUpdate);
     const currentDate = new Date();
     const timeDifference = currentDate - lastUpdateDate;
