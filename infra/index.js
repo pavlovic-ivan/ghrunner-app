@@ -38,7 +38,7 @@ const createOrDelete = async (context, action, stackName, config) => {
     console.log('Create/select stack');
     const args = {
         stackName: stackName,
-        projectName: config.repo,
+        projectName: `${config.owner}/${config.repo}`,
         program: pulumiProgram
     };
     const stack = await LocalWorkspace.createOrSelectStack(args);
