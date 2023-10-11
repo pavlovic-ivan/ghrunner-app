@@ -119,15 +119,19 @@ const executeCleanup = async (app) => {
                 "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
         });
-        const stacks = (await ws.listStacks()).filter(stack => shouldDeleteStack(app, stack));
+        const stacksToDeletePromises = (await ws.listStacks()).map(async stack => {
+            const shouldDelete = await shouldDeleteStack(app, stack);
+            return shouldDelete ? stack : null;
+        });
+        const stacksToDelete = (await Promise.all(stacksToDeletePromises)).filter(stack => stack !== null);
         
-        if(stacks.length === 0){
+        if(stacksToDelete.length === 0){
             console.log('Nothing to delete. Skipping...');
             return;
         }
 
-        console.log(`Stacks to delete: ${JSON.stringify(stacks)}`);
-        await Promise.all(stacks.map(stack => handleStack(stack)));
+        console.log(`Stacks to delete: ${JSON.stringify(stacksToDelete)}`);
+        await Promise.all(stacksToDelete.map(stack => handleStack(stack)));
         console.log('Executing cleanup done');
     } catch (err) {
         console.log(`Error occured while executing cleanup. Error: ${err}`);
@@ -184,19 +188,21 @@ async function removeStateFiles(stackData){
     
 }
 
-function shouldDeleteStack(app, stack){
-    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(app, stack);
+async function shouldDeleteStack(app, stack){
+    const runnerBusy = await runnerIsBusy(app, stack);
+    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerBusy;
 }
 
 function isCurrentlyUpdating(stack){
     return stack.updateInProgress;
 }
 
-function runnerIsBusy(app, stack){
+async function runnerIsBusy(app, stack){
     const organisedStackName = getOrganisedStackName(stack);
     for await (const { octokit, repository } of app.eachRepository.iterator()) {
-        console.log(`Repository: ${repository}`);
+        console.log(`Repository: ${JSON.stringify(repository)}`);
     }
+    return false;
 }
 
 function getOrganisedStackName(stack){
