@@ -38,7 +38,7 @@ const createOrDelete = async (context, action, stackName, config) => {
     console.log('Create/select stack');
     const args = {
         stackName: stackName,
-        projectName: `${config.owner}/${config.repo}`,
+        projectName: `${config.repo}`,
         program: pulumiProgram
     };
     const stack = await LocalWorkspace.createOrSelectStack(args);
@@ -102,10 +102,10 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     }
 }
 
-const executeCleanup = async (octokit) => {
+const executeCleanup = async (app) => {
     try {
         console.log('Executing cleanup');
-        console.log(`Got octokit: ${JSON.stringify(octokit)}`);
+        console.log(`Got app: ${JSON.stringify(app)}`);
         const ws = await LocalWorkspace.create({
             projectSettings: {
                 name: pulumi.getProject(),
@@ -119,7 +119,7 @@ const executeCleanup = async (octokit) => {
                 "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
         });
-        const stacks = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack));
+        const stacks = (await ws.listStacks()).filter(stack => shouldDeleteStack(app, stack));
         
         if(stacks.length === 0){
             console.log('Nothing to delete. Skipping...');
@@ -184,17 +184,19 @@ async function removeStateFiles(stackData){
     
 }
 
-function shouldDeleteStack(stack){
-    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(stack);
+function shouldDeleteStack(app, stack){
+    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(app, stack);
 }
 
 function isCurrentlyUpdating(stack){
     return stack.updateInProgress;
 }
 
-function runnerIsBusy(stack){
+function runnerIsBusy(app, stack){
     const organisedStackName = getOrganisedStackName(stack);
-
+    for await (const { octokit, repository } of app.eachRepository.iterator()) {
+        console.log(`Repository: ${repository}`);
+    }
 }
 
 function getOrganisedStackName(stack){
