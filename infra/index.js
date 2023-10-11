@@ -7,6 +7,7 @@ const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+const _ = require('lodash');
 
 const RETRY_MAX = 10;
 const RETRY_INTERVAL = 30000;
@@ -119,11 +120,9 @@ const executeCleanup = async (app) => {
                 "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
         });
-        const stacksToDeletePromises = (await ws.listStacks()).map(async stack => {
-            const shouldDelete = await shouldDeleteStack(app, stack);
-            return shouldDelete ? stack : null;
-        });
-        const stacksToDelete = (await Promise.all(stacksToDeletePromises)).filter(stack => stack !== null);
+        const registeredRunners = await getRegisteredRunners(app);
+        console.log(`Registered runners: ${JSON.stringify(registeredRunners)}`);
+        const stacksToDelete = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack, registeredRunners));
         
         if(stacksToDelete.length === 0){
             console.log('Nothing to delete. Skipping...');
@@ -188,21 +187,31 @@ async function removeStateFiles(stackData){
     
 }
 
-async function shouldDeleteStack(app, stack){
-    const runnerBusy = await runnerIsBusy(app, stack);
-    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerBusy;
+function shouldDeleteStack(stack, registeredRunners){
+    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(stack, registeredRunners);
 }
 
 function isCurrentlyUpdating(stack){
     return stack.updateInProgress;
 }
 
-async function runnerIsBusy(app, stack){
+function runnerIsBusy(stack, registeredRunners){
     const organisedStackName = getOrganisedStackName(stack);
+    const registeredRunner = _.filter(registeredRunners, { 'name': organisedStackName.runner });
+    console.log(`Registered runner found: ${JSON.stringify(registeredRunner)}`);
+    console.log(`Functio  will return: ${(registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online")}`);
+    return (registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online");
+}
+
+async function getRegisteredRunners(app){
     for await (const { octokit, repository } of app.eachRepository.iterator()) {
-        console.log(`Repository: ${JSON.stringify(repository)}`);
+        const runners = (await octokit.request('GET /repos/{owner}/{repo}/actions/runners', {
+            owner: repository.owner.login,
+            repo: repository.name
+        })).data.runners;
+        return runners;
     }
-    return false;
+    return [];
 }
 
 function getOrganisedStackName(stack){
