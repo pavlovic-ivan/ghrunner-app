@@ -205,10 +205,12 @@ function runnerIsBusy(stack, registeredRunners){
 
 async function getRegisteredRunners(app){
     for await (const { octokit, repository } of app.eachRepository.iterator()) {
+        console.log(`Repo owner: [${repository.owner.login}]. Repo name: [${repository.name}]`);
         const runners = (await octokit.request('GET /repos/{owner}/{repo}/actions/runners', {
             owner: repository.owner.login,
             repo: repository.name
         })).data.runners;
+        console.log(`Got runners from octokit: [${JSON.stringify(runners)}]`);
         return runners;
     }
     return [];
