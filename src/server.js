@@ -20,8 +20,10 @@ exports.handler = async function (event, context) {
         process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
 
         if(event.hasOwnProperty("source") && event.source === "aws.scheduler"){
-            const app = new App({ appId, privateKey });
-            await executeCleanup(app);
+            // const app = new App({ appId, privateKey });
+            // await executeCleanup(app);
+            console.log(`Got event: [${event}]`);
+            console.log(`Got context: [${context}]`);
         } else {
             probot = new Probot({ appId, privateKey, secret });
             await probot.load(probotApp);

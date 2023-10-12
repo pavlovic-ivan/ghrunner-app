@@ -60,6 +60,10 @@ Resources:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: !Ref cleanupScheduleExpression
+        RemoveRemoteStateFilesScheduler:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(1 minute)
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
