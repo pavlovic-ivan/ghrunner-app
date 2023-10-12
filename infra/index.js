@@ -7,6 +7,7 @@ const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+const _ = require('lodash');
 
 const RETRY_MAX = 10;
 const RETRY_INTERVAL = 30000;
@@ -38,7 +39,7 @@ const createOrDelete = async (context, action, stackName, config) => {
     console.log('Create/select stack');
     const args = {
         stackName: stackName,
-        projectName: config.repo,
+        projectName: `${config.repo}`,
         program: pulumiProgram
     };
     const stack = await LocalWorkspace.createOrSelectStack(args);
@@ -102,7 +103,7 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     }
 }
 
-const executeCleanup = async () => {
+const executeCleanup = async (app) => {
     try {
         console.log('Executing cleanup');
         const ws = await LocalWorkspace.create({
@@ -118,15 +119,15 @@ const executeCleanup = async () => {
                 "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
         });
-        const stacks = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack));
+        const registeredRunners = await getRegisteredRunners(app);
+        const stacksToDelete = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack, registeredRunners));
         
-        if(stacks.length === 0){
+        if(stacksToDelete.length === 0){
             console.log('Nothing to delete. Skipping...');
             return;
         }
 
-        console.log(`Stacks to delete: ${JSON.stringify(stacks)}`);
-        await Promise.all(stacks.map(stack => handleStack(stack)));
+        await Promise.all(stacksToDelete.map(stack => handleStack(stack)));
         console.log('Executing cleanup done');
     } catch (err) {
         console.log(`Error occured while executing cleanup. Error: ${err}`);
@@ -134,23 +135,24 @@ const executeCleanup = async () => {
 }
 
 async function handleStack(stack){
-    let stackNameParts = stack.name.split('/');
+    const organisedStackName = getOrganisedStackName(stack);
     console.log(`Stack [${stack.name}] is more than ${process.env.MAX_STACK_AGE_IN_MINUTES} minutes old. Deleting the stack now`);
     try {
         const selectedStack = await LocalWorkspace.selectStack({
             stackName: stack.name,
-            projectName: stackNameParts[1],
+            projectName: organisedStackName.repo,
             program: async () => {}
         });
         await retryDestroy(selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
-        console.log(`Next, removing state files from S3 bucket with AWS SDK`);
-        await removeStateFiles({
-            fullStakName: stack.name,
-            repo: stackNameParts[1],
-            ghrunnerName: stackNameParts[2]
-        });
-        console.log('Removing state files done');
+
+        // console.log(`Next, removing state files from S3 bucket with AWS SDK`); TODO: will be a part of the next PR and removed here as well
+        // await removeStateFiles({
+        //     fullStakName: stack.name,
+        //     repo: organisedStackName.repo,
+        //     ghrunnerName: organisedStackName.runner
+        // });
+        // console.log('Removing state files done');
     } catch(err){
         console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
@@ -182,15 +184,42 @@ async function removeStateFiles(stackData){
     
 }
 
-function shouldDeleteStack(stack){
-    return !isCurrentlyUpdating(stack) && isMoreThanOneHourOld(stack.lastUpdate);
+function shouldDeleteStack(stack, registeredRunners){
+    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(stack, registeredRunners);
 }
 
 function isCurrentlyUpdating(stack){
     return stack.updateInProgress;
 }
 
-function isMoreThanOneHourOld(lastUpdate) {
+function runnerIsBusy(stack, registeredRunners){
+    const organisedStackName = getOrganisedStackName(stack);
+    const registeredRunner = _.filter(registeredRunners, { 'name': organisedStackName.runner });
+    return (registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online");
+}
+
+async function getRegisteredRunners(app){
+    let allRunners = [];
+    for await (const { octokit, repository } of app.eachRepository.iterator()) {
+        const runnersByRepo = (await octokit.request('GET /repos/{owner}/{repo}/actions/runners', {
+            owner: repository.owner.login,
+            repo: repository.name
+        })).data.runners;
+        allRunners.push(runnersByRepo);
+    }
+    return allRunners;
+}
+
+function getOrganisedStackName(stack){
+    let stackNameComponents = stack.name.split('/');
+    return {
+        root: stackNameComponents[0],
+        repo: stackNameComponents[1],
+        runner: stackNameComponents[2]
+    };
+}
+
+function isOlderThanMaxStackAgeInMillis(lastUpdate) {
     const lastUpdateDate = new Date(lastUpdate);
     const currentDate = new Date();
     const timeDifference = currentDate - lastUpdateDate;
