@@ -106,7 +106,6 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
 const executeCleanup = async (app) => {
     try {
         console.log('Executing cleanup');
-        console.log(`Got app: ${JSON.stringify(app)}`);
         const ws = await LocalWorkspace.create({
             projectSettings: {
                 name: pulumi.getProject(),
@@ -121,7 +120,6 @@ const executeCleanup = async (app) => {
             }
         });
         const registeredRunners = await getRegisteredRunners(app);
-        console.log(`Registered runners: ${JSON.stringify(registeredRunners)}`);
         const stacksToDelete = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack, registeredRunners));
         
         if(stacksToDelete.length === 0){
@@ -129,7 +127,6 @@ const executeCleanup = async (app) => {
             return;
         }
 
-        console.log(`Stacks to delete: ${JSON.stringify(stacksToDelete)}`);
         await Promise.all(stacksToDelete.map(stack => handleStack(stack)));
         console.log('Executing cleanup done');
     } catch (err) {
@@ -198,20 +195,16 @@ function isCurrentlyUpdating(stack){
 function runnerIsBusy(stack, registeredRunners){
     const organisedStackName = getOrganisedStackName(stack);
     const registeredRunner = _.filter(registeredRunners, { 'name': organisedStackName.runner });
-    console.log(`Registered runner found: ${JSON.stringify(registeredRunner)}`);
-    console.log(`Function will return: ${(registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online")}`);
     return (registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online");
 }
 
 async function getRegisteredRunners(app){
     let allRunners = [];
     for await (const { octokit, repository } of app.eachRepository.iterator()) {
-        console.log(`Repo owner: [${repository.owner.login}]. Repo name: [${repository.name}]`);
         const runnersByRepo = (await octokit.request('GET /repos/{owner}/{repo}/actions/runners', {
             owner: repository.owner.login,
             repo: repository.name
         })).data.runners;
-        console.log(`Got runners from octokit: [${JSON.stringify(runnersByRepo)}]`);
         allRunners.push(runnersByRepo);
     }
     return allRunners;
