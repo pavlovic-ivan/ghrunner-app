@@ -22,8 +22,8 @@ exports.handler = async function (event, context) {
         if(event.hasOwnProperty("source") && event.source === "aws.scheduler"){
             // const app = new App({ appId, privateKey });
             // await executeCleanup(app);
-            console.log(`Got event: [${event}]`);
-            console.log(`Got context: [${context}]`);
+            console.log(`Got event: [${JSON.stringify(event)}]`);
+            console.log(`Got context: [${JSON.stringify(context)}]`);
         } else {
             probot = new Probot({ appId, privateKey, secret });
             await probot.load(probotApp);
