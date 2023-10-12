@@ -199,7 +199,7 @@ function runnerIsBusy(stack, registeredRunners){
     const organisedStackName = getOrganisedStackName(stack);
     const registeredRunner = _.filter(registeredRunners, { 'name': organisedStackName.runner });
     console.log(`Registered runner found: ${JSON.stringify(registeredRunner)}`);
-    console.log(`Functio  will return: ${(registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online")}`);
+    console.log(`Function will return: ${(registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online")}`);
     return (registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online");
 }
 
