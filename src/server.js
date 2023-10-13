@@ -23,7 +23,7 @@ exports.handler = async function (event, context) {
             const app = new App({ appId, privateKey });
             if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && _.isEqual(event.enabled, true)){
                 console.log('Scheduler enabled');
-                // await cleanupRemoteStateFiles(app);
+                // await cleanupRemoteStateFiles();
             } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && _.isEqual(event.enabled, true)){
                 console.log('Scheduler enabled');
                 // await executeCleanup(app);
