@@ -56,16 +56,16 @@ Resources:
             ApiId: !Ref HttpApiGateway
             Path: /ghrunner-app
             Method: POST
-        RogueInstanceScheduledCleanup:
+        SchedulerRogueInstanceCleanup:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: !Ref cleanupScheduleExpression
-        RemoveRemoteStateFilesScheduler:
+            Input: '{ "type": "scheduler", "name": "SchedulerRogueInstanceCleanup" }'
+        SchedulerRemoveRemoteStateFiles:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: rate(1 minute)
-            Input: '{ "key1": "value1", "key2": "value2" }'
-            Name: RemoveRemoteStateFilesScheduler
+            Input: '{ "type": "scheduler", "name": "SchedulerRemoveRemoteStateFiles" }'
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
