@@ -19,12 +19,12 @@ exports.handler = async function (event, context) {
         ]);
         process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
 
-        if(_.has(event, "type") && _.eq(event.type, "scheduler")){
+        if(_.has(event, "type") && _.isEqual(event.type, "scheduler")){
             const app = new App({ appId, privateKey });
-            if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && event.enabled){
+            if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && _.isEqual(event.enabled, true)){
                 console.log('Scheduler enabled');
                 // await cleanupRemoteStateFiles(app);
-            } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && event.enabled){
+            } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && _.isEqual(event.enabled, true)){
                 console.log('Scheduler enabled');
                 // await executeCleanup(app);
             } else {

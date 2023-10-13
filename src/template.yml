@@ -60,12 +60,12 @@ Resources:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: !Ref cleanupScheduleExpression
-            Input: '{ "type": "scheduler", "name": "SchedulerRogueInstanceCleanup", enabled: true }'
+            Input: '{ "type": "scheduler", "name": "SchedulerRogueInstanceCleanup", "enabled": true }'
         SchedulerRemoveRemoteStateFiles:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: rate(1 minute)
-            Input: '{ "type": "scheduler", "name": "SchedulerRemoveRemoteStateFiles", enabled: true }'
+            Input: '{ "type": "scheduler", "name": "SchedulerRemoveRemoteStateFiles", "enabled": true }'
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl

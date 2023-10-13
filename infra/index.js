@@ -103,12 +103,8 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     }
 }
 
-const cleanupRemoteStateFiles = async (app) => {
-    await removeStateFiles({
-        fullStakName: stack.name,
-        repo: organisedStackName.repo,
-        ghrunnerName: organisedStackName.runner
-    });
+const cleanupRemoteStateFiles = async () => {
+    await removeStateFiles();
     console.log('Removing state files done');
 }
 
@@ -116,7 +112,7 @@ const executeCleanup = async (app) => {
     try {
         console.log('Executing cleanup');
         const registeredRunners = await getRegisteredRunners(app);
-        
+
         const ws = await LocalWorkspace.create({
             projectSettings: {
                 name: pulumi.getProject(),
@@ -160,10 +156,10 @@ async function handleStack(stack){
     }
 }
 
-async function removeStateFiles(stackData){
+async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
     const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
-    const matchingS3Objects = s3Objects.Contents.filter(s3Object => s3Object.Key.includes(stackData.ghrunnerName));
+    const matchingS3Objects = s3Objects.Contents.filter(s3Object => !(_.isEqual(s3Object.Key, ".pulumi/meta.yaml")) && isOlderThanMaxStackAgeInMillis(s3Object.LastModified));
 
     var params = {
         Bucket: bucket, 
