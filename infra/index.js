@@ -195,7 +195,7 @@ function isCurrentlyUpdating(stack){
 function runnerIsBusy(stack, registeredRunners){
     const organisedStackName = getOrganisedStackName(stack);
     const registeredRunner = _.filter(registeredRunners, { 'name': organisedStackName.runner });
-    return (registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online");
+    return (registeredRunner !== undefined && registeredRunner != null && registeredRunner.status === "online" && registeredRunner.busy === true);
 }
 
 async function getRegisteredRunners(app){
