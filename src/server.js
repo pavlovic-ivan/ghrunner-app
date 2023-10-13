@@ -1,19 +1,16 @@
 const { SecretsManager } = require("@aws-sdk/client-secrets-manager");
 const { Probot } = require('probot');
 const probotApp = require("./app");
-const { executeCleanup } = require("../infra");
+const { executeCleanup, cleanupRemoteStateFiles } = require("../infra");
 const lowercaseKeys = require("lowercase-keys");
 const { App } = require("@octokit/app");
+const _ = require('lodash');
 
 const client = new SecretsManager();
 let probot;
 
 exports.handler = async function (event, context) {
     try {
-
-        console.log(`Got event: [${JSON.stringify(event)}]`);
-        console.log(`Got context: [${JSON.stringify(context)}]`);
-
         const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
             getSecretValue('appId'),
             getSecretValue('privateKey'),
@@ -22,11 +19,17 @@ exports.handler = async function (event, context) {
         ]);
         process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
 
-        if(event.hasOwnProperty("source") && event.source === "aws.scheduler"){
-            // const app = new App({ appId, privateKey });
-            // await executeCleanup(app);
-            console.log(`Got event: [${JSON.stringify(event)}]`);
-            console.log(`Got context: [${JSON.stringify(context)}]`);
+        if(_.has(event, "type") && _.eq(event.type, "scheduler")){
+            const app = new App({ appId, privateKey });
+            if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && event.enabled){
+                console.log('Scheduler enabled');
+                // await cleanupRemoteStateFiles(app);
+            } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && event.enabled){
+                console.log('Scheduler enabled');
+                // await executeCleanup(app);
+            } else {
+                console.log('Unknown scheduler...');
+            }
         } else {
             probot = new Probot({ appId, privateKey, secret });
             await probot.load(probotApp);

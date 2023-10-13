@@ -103,9 +103,20 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     }
 }
 
+const cleanupRemoteStateFiles = async (app) => {
+    await removeStateFiles({
+        fullStakName: stack.name,
+        repo: organisedStackName.repo,
+        ghrunnerName: organisedStackName.runner
+    });
+    console.log('Removing state files done');
+}
+
 const executeCleanup = async (app) => {
     try {
         console.log('Executing cleanup');
+        const registeredRunners = await getRegisteredRunners(app);
+        
         const ws = await LocalWorkspace.create({
             projectSettings: {
                 name: pulumi.getProject(),
@@ -119,7 +130,6 @@ const executeCleanup = async (app) => {
                 "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
         });
-        const registeredRunners = await getRegisteredRunners(app);
         const stacksToDelete = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack, registeredRunners));
         
         if(stacksToDelete.length === 0){
@@ -145,14 +155,6 @@ async function handleStack(stack){
         });
         await retryDestroy(selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
-
-        // console.log(`Next, removing state files from S3 bucket with AWS SDK`); TODO: will be a part of the next PR and removed here as well
-        // await removeStateFiles({
-        //     fullStakName: stack.name,
-        //     repo: organisedStackName.repo,
-        //     ghrunnerName: organisedStackName.runner
-        // });
-        // console.log('Removing state files done');
     } catch(err){
         console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
@@ -227,5 +229,5 @@ function isOlderThanMaxStackAgeInMillis(lastUpdate) {
 }
 
 module.exports = {
-    createOrDelete, executeCleanup
+    createOrDelete, executeCleanup, cleanupRemoteStateFiles
 }
