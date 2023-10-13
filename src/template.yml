@@ -64,6 +64,7 @@ Resources:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: rate(1 minute)
+          Input: '{ "key1": "value1", "key2": "value2" }'
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
