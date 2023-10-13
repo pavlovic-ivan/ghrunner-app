@@ -22,11 +22,9 @@ exports.handler = async function (event, context) {
         if(_.has(event, "type") && _.isEqual(event.type, "scheduler")){
             const app = new App({ appId, privateKey });
             if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && _.isEqual(event.enabled, true)){
-                console.log('Scheduler enabled');
-                // await cleanupRemoteStateFiles();
+                await cleanupRemoteStateFiles();
             } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && _.isEqual(event.enabled, true)){
-                console.log('Scheduler enabled');
-                // await executeCleanup(app);
+                await executeCleanup(app);
             } else {
                 console.log(`Unknown scheduler, or scheduler [${event.name}] is disabled`);
             }
