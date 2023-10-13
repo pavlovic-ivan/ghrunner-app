@@ -64,7 +64,8 @@ Resources:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: rate(1 minute)
-          Input: '{ "key1": "value1", "key2": "value2" }'
+            Input: '{ "key1": "value1", "key2": "value2" }'
+            Name: RemoveRemoteStateFilesScheduler
       Environment:
         Variables:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
