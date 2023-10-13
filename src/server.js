@@ -11,6 +11,9 @@ let probot;
 exports.handler = async function (event, context) {
     try {
 
+        console.log(`Got event: [${JSON.stringify(event)}]`);
+        console.log(`Got context: [${JSON.stringify(context)}]`);
+
         const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
             getSecretValue('appId'),
             getSecretValue('privateKey'),
