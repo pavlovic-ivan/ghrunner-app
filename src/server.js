@@ -28,7 +28,7 @@ exports.handler = async function (event, context) {
                 console.log('Scheduler enabled');
                 // await executeCleanup(app);
             } else {
-                console.log('Unknown scheduler...');
+                console.log(`Unknown scheduler, or scheduler [${event.name}] is disabled`);
             }
         } else {
             probot = new Probot({ appId, privateKey, secret });
