@@ -30,6 +30,9 @@ Parameters:
   maxStackAgeInMinutes:
     Description: Maximum age of Pulumi stack in minutes
     Type: Number
+  maxStateFileAgeInMinutes:
+    Description: Maximum age of Pulumi state file in minutes
+    Type: Number
   cleanupScheduleExpression:
     Description: Expression for the rogue instance cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
     Type: String
@@ -71,6 +74,7 @@ Resources:
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
           DEPLOYMENT_TIMESTAMP: !Ref timestamp
           MAX_STACK_AGE_IN_MINUTES: !Ref maxStackAgeInMinutes
+          MAX_STATE_FILE_AGE_IN_MINUTES: !Ref maxStateFileAgeInMinutes
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi

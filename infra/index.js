@@ -12,6 +12,7 @@ const _ = require('lodash');
 const RETRY_MAX = 10;
 const RETRY_INTERVAL = 30000;
 const MAX_STACK_AGE_IN_MILLIS = (process.env.MAX_STACK_AGE_IN_MINUTES * 60 * 1000)
+const MAX_STATE_FILE_AGE_IN_MILLIS = (process.env.MAX_STATE_FILE_AGE_IN_MINUTES * 60 * 1000)
 
 const createOrDelete = async (context, action, stackName, config) => {
     console.log('About to create/delete infra');
@@ -159,7 +160,7 @@ async function handleStack(stack){
 async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
     const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
-    const matchingS3Objects = s3Objects.Contents.filter(s3Object => !(_.isEqual(s3Object.Key, ".pulumi/meta.yaml")) && isOlderThanMaxStackAgeInMillis(s3Object.LastModified));
+    const matchingS3Objects = s3Objects.Contents.filter(s3Object => !(_.isEqual(s3Object.Key, ".pulumi/meta.yaml")) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
 
     var params = {
         Bucket: bucket, 
@@ -183,7 +184,7 @@ async function removeStateFiles(){
 }
 
 function shouldDeleteStack(stack, registeredRunners){
-    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(stack, registeredRunners);
+    return !isCurrentlyUpdating(stack) && isDateOlderThan(stack.lastUpdate, MAX_STACK_AGE_IN_MILLIS) && !runnerIsBusy(stack, registeredRunners);
 }
 
 function isCurrentlyUpdating(stack){
@@ -217,11 +218,11 @@ function getOrganisedStackName(stack){
     };
 }
 
-function isOlderThanMaxStackAgeInMillis(lastUpdate) {
-    const lastUpdateDate = new Date(lastUpdate);
+function isDateOlderThan(date, age) {
+    const lastUpdateDate = new Date(date);
     const currentDate = new Date();
     const timeDifference = currentDate - lastUpdateDate;
-    return timeDifference > MAX_STACK_AGE_IN_MILLIS;
+    return timeDifference > age;
 }
 
 module.exports = {
