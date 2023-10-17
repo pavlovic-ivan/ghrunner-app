@@ -163,6 +163,10 @@ async function removeStateFiles(){
     const matchingS3Objects = s3Objects.Contents.filter(s3Object => !(_.isEqual(s3Object.Key, ".pulumi/meta.yaml")) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
 
     console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
+    if(_.isEmpty(matchingS3Objects)){
+        console.log('Nothing to delete. Skipping...');
+        return;
+    }
 
     var params = {
         Bucket: bucket, 
