@@ -22,16 +22,7 @@ exports.handler = async function (event, context) {
         if(_.has(event, "type") && _.isEqual(event.type, "scheduler")){
             const app = new App({ appId, privateKey });
             if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && _.isEqual(event.enabled, true)){
-                console.log(`Event: ${JSON.stringify(event)}`);
-                console.log(`Context: ${JSON.stringify(context)}`);
-
-                console.log(JSON.stringify({
-                    type: "error",
-                    message: "Demo error",
-                    eventID: "asd24rs3",
-                    RID: "asdwer23134r5d34"
-                }));
-
+                console.log('Running SchedulerRemoveRemoteStateFiles scheduler...');
                 await cleanupRemoteStateFiles();
             } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && _.isEqual(event.enabled, true)){
                 await executeCleanup(app);
