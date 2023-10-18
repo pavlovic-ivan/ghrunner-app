@@ -160,7 +160,7 @@ async function handleStack(stack){
 async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
     const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
-    const matchingS3Objects = s3Objects.Contents.filter(s3Object => !(_.isEqual(s3Object.Key, ".pulumi/meta.yaml")) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+    const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
 
     console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
     if(_.isEmpty(matchingS3Objects)){
@@ -180,14 +180,20 @@ async function removeStateFiles(){
        params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
     });
 
-    console.log(`Creating a DeleteObjects request with params: ${JSON.stringify(params)}`);
     const deleteObjectsResult = await s3.deleteObjects(params).promise();
     if(deleteObjectsResult.Errors.length > 0){
         console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
     } else {
         console.log(`Successfully deleted S3 objects`);
     }
-    
+}
+
+function objectIsNotPulumiMeta(s3Object){
+    return !(_.isEqual(s3Object.Key, ".pulumi/meta.yaml"));
+}
+
+function objectIsNotLockFile(s3Object){
+    return !(_.startsWith(s3Object.Key, ".pulumi/locks"));
 }
 
 function shouldDeleteStack(stack, registeredRunners){
