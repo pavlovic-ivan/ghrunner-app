@@ -12,6 +12,7 @@ const _ = require('lodash');
 const RETRY_MAX = 10;
 const RETRY_INTERVAL = 30000;
 const MAX_STACK_AGE_IN_MILLIS = (process.env.MAX_STACK_AGE_IN_MINUTES * 60 * 1000)
+const MAX_STATE_FILE_AGE_IN_MILLIS = (process.env.MAX_STATE_FILE_AGE_IN_MINUTES * 60 * 1000)
 
 const createOrDelete = async (context, action, stackName, config) => {
     console.log('About to create/delete infra');
@@ -103,9 +104,16 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
     }
 }
 
+const cleanupRemoteStateFiles = async () => {
+    await removeStateFiles();
+    console.log('Removing state files done');
+}
+
 const executeCleanup = async (app) => {
     try {
         console.log('Executing cleanup');
+        const registeredRunners = await getRegisteredRunners(app);
+
         const ws = await LocalWorkspace.create({
             projectSettings: {
                 name: pulumi.getProject(),
@@ -119,7 +127,6 @@ const executeCleanup = async (app) => {
                 "PULUMI_BACKEND_URL": process.env.PULUMI_BACKEND_URL
             }
         });
-        const registeredRunners = await getRegisteredRunners(app);
         const stacksToDelete = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack, registeredRunners));
         
         if(stacksToDelete.length === 0){
@@ -145,23 +152,21 @@ async function handleStack(stack){
         });
         await retryDestroy(selectedStack);
         console.log(`Stack [${stack.name}] deleted`);
-
-        // console.log(`Next, removing state files from S3 bucket with AWS SDK`); TODO: will be a part of the next PR and removed here as well
-        // await removeStateFiles({
-        //     fullStakName: stack.name,
-        //     repo: organisedStackName.repo,
-        //     ghrunnerName: organisedStackName.runner
-        // });
-        // console.log('Removing state files done');
     } catch(err){
         console.log(`Error occured while selecting a stack. Error: ${err}`);
     }
 }
 
-async function removeStateFiles(stackData){
+async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
     const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
-    const matchingS3Objects = s3Objects.Contents.filter(s3Object => s3Object.Key.includes(stackData.ghrunnerName));
+    const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+
+    console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
+    if(_.isEmpty(matchingS3Objects)){
+        console.log('Nothing to delete. Skipping...');
+        return;
+    }
 
     var params = {
         Bucket: bucket, 
@@ -181,11 +186,18 @@ async function removeStateFiles(stackData){
     } else {
         console.log(`Successfully deleted S3 objects`);
     }
-    
+}
+
+function objectIsNotPulumiMeta(s3Object){
+    return !(_.isEqual(s3Object.Key, ".pulumi/meta.yaml"));
+}
+
+function objectIsNotLockFile(s3Object){
+    return !(_.startsWith(s3Object.Key, ".pulumi/locks"));
 }
 
 function shouldDeleteStack(stack, registeredRunners){
-    return !isCurrentlyUpdating(stack) && isOlderThanMaxStackAgeInMillis(stack.lastUpdate) && !runnerIsBusy(stack, registeredRunners);
+    return !isCurrentlyUpdating(stack) && isDateOlderThan(stack.lastUpdate, MAX_STACK_AGE_IN_MILLIS) && !runnerIsBusy(stack, registeredRunners);
 }
 
 function isCurrentlyUpdating(stack){
@@ -219,13 +231,13 @@ function getOrganisedStackName(stack){
     };
 }
 
-function isOlderThanMaxStackAgeInMillis(lastUpdate) {
-    const lastUpdateDate = new Date(lastUpdate);
+function isDateOlderThan(date, age) {
+    const lastUpdateDate = new Date(date);
     const currentDate = new Date();
     const timeDifference = currentDate - lastUpdateDate;
-    return timeDifference > MAX_STACK_AGE_IN_MILLIS;
+    return timeDifference > age;
 }
 
 module.exports = {
-    createOrDelete, executeCleanup
+    createOrDelete, executeCleanup, cleanupRemoteStateFiles
 }

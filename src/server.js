@@ -1,16 +1,16 @@
 const { SecretsManager } = require("@aws-sdk/client-secrets-manager");
 const { Probot } = require('probot');
 const probotApp = require("./app");
-const { executeCleanup } = require("../infra");
+const { executeCleanup, cleanupRemoteStateFiles } = require("../infra");
 const lowercaseKeys = require("lowercase-keys");
 const { App } = require("@octokit/app");
+const _ = require('lodash');
 
 const client = new SecretsManager();
 let probot;
 
 exports.handler = async function (event, context) {
     try {
-
         const [appId, privateKey, secret, pulumiPassphrase] = await Promise.all([
             getSecretValue('appId'),
             getSecretValue('privateKey'),
@@ -19,9 +19,16 @@ exports.handler = async function (event, context) {
         ]);
         process.env.PULUMI_CONFIG_PASSPHRASE = pulumiPassphrase;
 
-        if(event.hasOwnProperty("source") && event.source === "aws.scheduler"){
+        if(_.has(event, "type") && _.isEqual(event.type, "scheduler")){
             const app = new App({ appId, privateKey });
-            await executeCleanup(app);
+            if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && _.isEqual(event.enabled, true)){
+                console.log('Running SchedulerRemoveRemoteStateFiles scheduler...');
+                await cleanupRemoteStateFiles();
+            } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && _.isEqual(event.enabled, true)){
+                await executeCleanup(app);
+            } else {
+                console.log(`Unknown scheduler, or scheduler [${event.name}] is disabled`);
+            }
         } else {
             probot = new Probot({ appId, privateKey, secret });
             await probot.load(probotApp);
