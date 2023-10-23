@@ -56,7 +56,7 @@ jobs:
       
       - name: Push docker image
         env:
-          ECR_REPO: ${{ secrets.ECR_REPO }}  
+          ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPO
           docker tag ghrunner-app-lambda:latest $ECR_REPO/ghrunner-app:latest
@@ -73,8 +73,8 @@ jobs:
           TLS_CERTIFICATE_ARN: ${{ secrets.TLS_CERTIFICATE_ARN }}
           PULUMI_BACKEND_URL: ${{ secrets.PULUMI_BACKEND_URL }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
-          MACHINE_TYPE: ${{ vars.MACHINE_TYPE }}
-          MACHINE_IMAGE: ${{ vars.MACHINE_IMAGE }}
-          BOOT_DISK_SIZE_IN_GB: ${{ vars.BOOT_DISK_SIZE_IN_GB }}
-          BOOT_DISK_TYPE: ${{ vars.BOOT_DISK_TYPE }}
+          MAX_STACK_AGE_IN_MINUTES: ${{ vars.MAX_STACK_AGE_IN_MINUTES }}
+          MAX_STATE_FILE_AGE_IN_MINUTES: ${{ vars.MAX_STATE_FILE_AGE_IN_MINUTES }}
+          ROGUE_INSTANCE_CLEANUP_SCHEDULE: ${{ vars.ROGUE_INSTANCE_CLEANUP_SCHEDULE }}
+          REMOTE_STATE_FILES_CLEANUP_SCHEDULE: ${{ vars.REMOTE_STATE_FILES_CLEANUP_SCHEDULE }}
         run: make up

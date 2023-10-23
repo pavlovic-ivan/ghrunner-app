@@ -20,6 +20,7 @@ const probotApp = async (app) => {
         
         if(action !== null){
           console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
+
           try {
             let stack_name; 
             if(action === "completed"){
@@ -38,6 +39,7 @@ const probotApp = async (app) => {
               repo: repo_full_name[1],
               labels: labels
             }
+
             await createOrDelete(context, action, stack_name, config);
           } catch (error) {
             console.log(`Error occured while trying to destroy/create infrastructure. Error: ${error}`);
