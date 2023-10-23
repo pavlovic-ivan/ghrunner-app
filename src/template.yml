@@ -36,6 +36,9 @@ Parameters:
   cleanupScheduleExpression:
     Description: Expression for the rogue instance cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
     Type: String
+  remoteStateFileCleanupScheduleExpression:
+    Description: Expression for the remote state files cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
+    Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -67,7 +70,7 @@ Resources:
         SchedulerRemoveRemoteStateFiles:
           Type: ScheduleV2
           Properties:
-            ScheduleExpression: rate(1 minute)
+            ScheduleExpression: !Ref remoteStateFileCleanupScheduleExpression
             Input: '{ "type": "scheduler", "name": "SchedulerRemoveRemoteStateFiles", "enabled": true }'
       Environment:
         Variables:

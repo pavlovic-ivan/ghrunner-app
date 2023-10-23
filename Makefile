@@ -15,7 +15,7 @@ up: build
 		--debug \
 		--image-repository ${ECR_REPO}/ghrunner-app \
 		--capabilities CAPABILITY_IAM \
-		--parameter-overrides "awsRole=${AWS_ARN_ROLE} functionName=${function_name} hostedZoneId=${HOSTED_ZONE_ID} fullDomainName=${FULL_DOMAIN_NAME} tlsCertificateArn=${TLS_CERTIFICATE_ARN} pulumiBackendUrl=${PULUMI_BACKEND_URL} ecrRepo=${ECR_REPO}/ghrunner-app timestamp=${timestamp} maxStackAgeInMinutes=${MAX_STACK_AGE_IN_MINUTES} maxStateFileAgeInMinutes=${MAX_STATE_FILE_AGE_IN_MINUTES} cleanupScheduleExpression='${ROGUE_INSTANCE_CLEANUP_SCHEDULE}'" \
+		--parameter-overrides "awsRole=${AWS_ARN_ROLE} functionName=${function_name} hostedZoneId=${HOSTED_ZONE_ID} fullDomainName=${FULL_DOMAIN_NAME} tlsCertificateArn=${TLS_CERTIFICATE_ARN} pulumiBackendUrl=${PULUMI_BACKEND_URL} ecrRepo=${ECR_REPO}/ghrunner-app timestamp=${timestamp} maxStackAgeInMinutes=${MAX_STACK_AGE_IN_MINUTES} maxStateFileAgeInMinutes=${MAX_STATE_FILE_AGE_IN_MINUTES} cleanupScheduleExpression='${ROGUE_INSTANCE_CLEANUP_SCHEDULE}' remoteStateFileCleanupScheduleExpression='${REMOTE_STATE_FILES_CLEANUP_SCHEDULE}'" \
 		|| exit 1
 
 down:
