@@ -157,6 +157,20 @@ async function handleStack(stack){
     }
 }
 
+function chunkArray(array, chunkSize) {
+    var index = 0;
+    var arrayLength = array.length;
+    var tempArray = [];
+    
+    for (index = 0; index < arrayLength; index += chunkSize) {
+        const chunk = array.slice(index, index + chunkSize);
+        tempArray.push(chunk);
+    }
+
+    return tempArray;
+}
+
+
 async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
     const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
@@ -168,23 +182,27 @@ async function removeStateFiles(){
         return;
     }
 
-    var params = {
-        Bucket: bucket, 
-        Delete: {
-            Objects: [], 
-            Quiet: false
+    const chunks = chunkArray(matchingS3Objects, 1000);
+
+    for (const chunk of chunks) {
+        var params = {
+            Bucket: bucket, 
+            Delete: {
+                Objects: [], 
+                Quiet: false
+            }
+        };
+
+        chunk.forEach(matchingS3Object => {
+            params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
+        });
+
+        const deleteObjectsResult = await s3.deleteObjects(params).promise();
+        if(deleteObjectsResult.Errors && deleteObjectsResult.Errors.length > 0){
+            console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
+        } else {
+            console.log(`Successfully deleted ${chunk.length} S3 objects`);
         }
-    };
-
-    matchingS3Objects.forEach(matchingS3Object => {
-       params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
-    });
-
-    const deleteObjectsResult = await s3.deleteObjects(params).promise();
-    if(deleteObjectsResult.Errors.length > 0){
-        console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
-    } else {
-        console.log(`Successfully deleted S3 objects`);
     }
 }
 
