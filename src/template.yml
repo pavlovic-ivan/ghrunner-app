@@ -9,9 +9,6 @@ Parameters:
   functionName:
     Description: The AWS Lambda's Function name
     Type: String
-  githubJobFilter:
-    Description: The Job Filter
-    Type: String
   hostedZoneId:
     Description: ID of the Hosted zone where static record set will be created
     Type: String
@@ -30,30 +27,30 @@ Parameters:
   timestamp:
     Description: Timestamp of the deployment
     Type: String
-  machineType:
-    Description: AWS EC2 type
+  maxStackAgeInMinutes:
+    Description: Maximum age of Pulumi stack in minutes
+    Type: Number
+  maxStateFileAgeInMinutes:
+    Description: Maximum age of Pulumi state file in minutes
+    Type: Number
+  cleanupScheduleExpression:
+    Description: Expression for the rogue instance cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
     Type: String
-  machineImage:
-    Description: Name of AMI
-    Type: String
-  bootDiskSizeInGB:
-    Description: Boot disk size ion GB
-    Type: String
-  bootDiskType:
-    Description: Boot disk type
+  remoteStateFileCleanupScheduleExpression:
+    Description: Expression for the remote state files cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
     Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Ref functionName
+      FunctionName: !Join [ "-", [ !Ref functionName, !Ref timestamp ] ]
       Description: Basic Auth Funtion
       Role: !Ref awsRole
       MemorySize: 512
       EphemeralStorage:
         Size: 10240
-      Timeout: 300
+      Timeout: 900
       PackageType: Image
       ImageUri: !Join [ ":", [ !Ref ecrRepo, 'latest' ] ]
       Tags:
@@ -65,15 +62,22 @@ Resources:
             ApiId: !Ref HttpApiGateway
             Path: /ghrunner-app
             Method: POST
+        SchedulerRogueInstanceCleanup:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: !Ref cleanupScheduleExpression
+            Input: '{ "type": "scheduler", "name": "SchedulerRogueInstanceCleanup", "enabled": true }'
+        SchedulerRemoveRemoteStateFiles:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: !Ref remoteStateFileCleanupScheduleExpression
+            Input: '{ "type": "scheduler", "name": "SchedulerRemoveRemoteStateFiles", "enabled": true }'
       Environment:
         Variables:
-          JOB_FILTER: !Ref githubJobFilter
           PULUMI_BACKEND_URL: !Ref pulumiBackendUrl
           DEPLOYMENT_TIMESTAMP: !Ref timestamp
-          MACHINE_TYPE: !Ref machineType 
-          MACHINE_IMAGE: !Ref machineImage
-          BOOT_DISK_SIZE_IN_GB: !Ref bootDiskSizeInGB
-          BOOT_DISK_TYPE: !Ref bootDiskType
+          MAX_STACK_AGE_IN_MINUTES: !Ref maxStackAgeInMinutes
+          MAX_STATE_FILE_AGE_IN_MINUTES: !Ref maxStateFileAgeInMinutes
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi

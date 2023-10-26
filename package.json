@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "start": "docker run -p 9000:8080 --name ghrunner-app-lambda --env-file .env -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN --rm ghrunner-app-lambda",
-    "test": "JOB_FILTER=cuda mocha tests",
-    "build": "docker build -t ghrunner-app-lambda ."
+    "test": "RUN_CTX=test mocha tests",
+    "build": "./docker-build.sh"
   },
   "license": "ISC",
   "dependencies": {
@@ -12,7 +12,10 @@
     "@probot/adapter-aws-lambda-serverless": "^3.0.2",
     "@pulumi/aws": "^5.34.0",
     "@pulumi/pulumi": "^3.61.0",
+    "ajv": "^8.12.0",
     "dotenv": "^8.6.0",
+    "js-yaml": "^3.14.1",
+    "lodash": "^4.17.21",
     "mustache": "^4.2.0",
     "octokit": "^2.0.14",
     "probot": "^12.2.3",
