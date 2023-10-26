@@ -171,9 +171,8 @@ async function removeStateFiles(){
     
         console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
         if(_.isEmpty(matchingS3Objects)){
-            console.log('Nothing to delete. Skipping...');
-            proceed = false;
-            return;
+            console.log('No matching objects. Skipping this turn...');
+            continue;
         }
     
         var params = {
