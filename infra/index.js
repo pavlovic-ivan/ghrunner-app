@@ -185,13 +185,14 @@ async function removeStateFiles(){
         };
     
         matchingS3Objects.forEach(matchingS3Object => {
-           params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
+           params.Delete.Objects.push({ Key: matchingS3Object.Key });
         });
     
         const deleteObjectsResult = await s3.deleteObjects(params).promise();
         if(deleteObjectsResult.Errors.length > 0){
             console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
         } else {
+            deleteObjectsResult.Deleted.forEach(deletedObject => console.log(`Deleted object: ${deletedObject.Key}`));
             console.log(`Successfully deleted S3 objects`);
         }
     }
