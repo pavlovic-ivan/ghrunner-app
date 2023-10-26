@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - "implement-pagination"
   workflow_dispatch:
 
 jobs:
