@@ -157,34 +157,25 @@ async function handleStack(stack){
     }
 }
 
-function chunkArray(array, chunkSize) {
-    var index = 0;
-    var arrayLength = array.length;
-    var tempArray = [];
-    
-    for (index = 0; index < arrayLength; index += chunkSize) {
-        const chunk = array.slice(index, index + chunkSize);
-        tempArray.push(chunk);
-    }
-
-    return tempArray;
-}
-
-
 async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
-    const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
-    const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+    let proceed = true;
+    let continuationToken = null;
 
-    console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
-    if(_.isEmpty(matchingS3Objects)){
-        console.log('Nothing to delete. Skipping...');
-        return;
-    }
+    while(proceed){
+        const s3Objects = await s3.listObjectsV2({Bucket: bucket, MaxKeys: 2, ContinuationToken: continuationToken || undefined}).promise();
+        proceed = s3Objects.IsTruncated;
+        continuationToken = s3Objects.NextContinuationToken;
 
-    const chunks = chunkArray(matchingS3Objects, 1000);
-
-    for (const chunk of chunks) {
+        const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+    
+        console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
+        if(_.isEmpty(matchingS3Objects)){
+            console.log('Nothing to delete. Skipping...');
+            proceed = false;
+            return;
+        }
+    
         var params = {
             Bucket: bucket, 
             Delete: {
@@ -192,16 +183,16 @@ async function removeStateFiles(){
                 Quiet: false
             }
         };
-
-        chunk.forEach(matchingS3Object => {
-            params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
+    
+        matchingS3Objects.forEach(matchingS3Object => {
+           params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
         });
-
+    
         const deleteObjectsResult = await s3.deleteObjects(params).promise();
-        if(deleteObjectsResult.Errors && deleteObjectsResult.Errors.length > 0){
+        if(deleteObjectsResult.Errors.length > 0){
             console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
         } else {
-            console.log(`Successfully deleted ${chunk.length} S3 objects`);
+            console.log(`Successfully deleted S3 objects`);
         }
     }
 }
