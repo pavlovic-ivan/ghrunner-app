@@ -159,32 +159,41 @@ async function handleStack(stack){
 
 async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
-    const s3Objects = await s3.listObjectsV2({Bucket: bucket}).promise();
-    const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+    let proceed = true;
+    let continuationToken = null;
 
-    console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
-    if(_.isEmpty(matchingS3Objects)){
-        console.log('Nothing to delete. Skipping...');
-        return;
-    }
+    while(proceed){
+        const s3Objects = await s3.listObjectsV2({Bucket: bucket, ContinuationToken: continuationToken || undefined}).promise();
+        proceed = s3Objects.IsTruncated;
+        continuationToken = s3Objects.NextContinuationToken;
 
-    var params = {
-        Bucket: bucket, 
-        Delete: {
-            Objects: [], 
-            Quiet: false
+        const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+    
+        console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
+        if(_.isEmpty(matchingS3Objects)){
+            console.log('No matching objects. Skipping this turn...');
+            continue;
         }
-    };
-
-    matchingS3Objects.forEach(matchingS3Object => {
-       params.Delete.Objects.push({ Key: matchingS3Object.Key }); 
-    });
-
-    const deleteObjectsResult = await s3.deleteObjects(params).promise();
-    if(deleteObjectsResult.Errors.length > 0){
-        console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
-    } else {
-        console.log(`Successfully deleted S3 objects`);
+    
+        var params = {
+            Bucket: bucket, 
+            Delete: {
+                Objects: [], 
+                Quiet: false
+            }
+        };
+    
+        matchingS3Objects.forEach(matchingS3Object => {
+           params.Delete.Objects.push({ Key: matchingS3Object.Key });
+        });
+    
+        const deleteObjectsResult = await s3.deleteObjects(params).promise();
+        if(deleteObjectsResult.Errors.length > 0){
+            console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
+        } else {
+            deleteObjectsResult.Deleted.forEach(deletedObject => console.log(`Deleted object: ${deletedObject.Key}`));
+            console.log(`Successfully deleted S3 objects`);
+        }
     }
 }
 
