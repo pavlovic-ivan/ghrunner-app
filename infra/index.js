@@ -163,7 +163,7 @@ async function removeStateFiles(){
     let continuationToken = null;
 
     while(proceed){
-        const s3Objects = await s3.listObjectsV2({Bucket: bucket, MaxKeys: 2, ContinuationToken: continuationToken || undefined}).promise();
+        const s3Objects = await s3.listObjectsV2({Bucket: bucket, ContinuationToken: continuationToken || undefined}).promise();
         proceed = s3Objects.IsTruncated;
         continuationToken = s3Objects.NextContinuationToken;
 
