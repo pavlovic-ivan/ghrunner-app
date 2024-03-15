@@ -5,20 +5,23 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  NODE_VERSION: 20
+
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
     environment: protected
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Echo config to file
         run: echo "${{ vars.CONFIG }}" > ./config.yml
       
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
       
       - name: Install Dependencies
@@ -33,14 +36,14 @@ jobs:
     environment: protected
     needs: test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Echo config to file
         run: echo "${{ vars.CONFIG }}" > ./config.yml
       
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
       
       - name: Build docker image
