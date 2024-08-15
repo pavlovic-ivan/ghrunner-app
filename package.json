@@ -8,6 +8,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.632.0",
     "@aws-sdk/client-secrets-manager": "^3.321.1",
     "@probot/adapter-aws-lambda-serverless": "^3.0.2",
     "@pulumi/aws": "^6.0.2",

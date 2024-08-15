@@ -6,7 +6,8 @@ const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
 // const { AWS } = require('aws-sdk');
-const s3 = require('aws-sdk/clients/s3');
+// const { S3 } = require('aws-sdk/clients/s3');
+const { S3Client, ListObjectsV2Command, DeleteObjectsCommand } = require("@aws-sdk/client-s3");
 const _ = require('lodash');
 
 const RETRY_MAX = 10;
@@ -166,9 +167,11 @@ async function removeStateFiles(){
     const bucket = process.env.PULUMI_BACKEND_URL.replace(/^s3:\/\//, '');
     let proceed = true;
     let continuationToken = null;
+    const client = new S3Client({ region: process.env.AWS_REGION });
 
     while(proceed){
-        const s3Objects = await s3.listObjectsV2({Bucket: bucket, ContinuationToken: continuationToken || undefined}).promise();
+        const s3Objects = await client.send(new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken || undefined}));
+        // const s3Objects = await S3.listObjectsV2({Bucket: bucket, ContinuationToken: continuationToken || undefined}).promise();
         proceed = s3Objects.IsTruncated;
         continuationToken = s3Objects.NextContinuationToken;
 
@@ -196,7 +199,8 @@ async function removeStateFiles(){
            params.Delete.Objects.push({ Key: matchingS3Object.Key });
         });
     
-        const deleteObjectsResult = await s3.deleteObjects(params).promise();
+        // const deleteObjectsResult = await S3.deleteObjects(params).promise();
+        const deleteObjectsResult = await client.send(new DeleteObjectsCommand(params));
         if(deleteObjectsResult.Errors.length > 0){
             console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
         } else {
