@@ -172,7 +172,11 @@ async function removeStateFiles(){
         proceed = s3Objects.IsTruncated;
         continuationToken = s3Objects.NextContinuationToken;
 
-        const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+        const matchingS3Objects = s3Objects.Contents.map(s3Object => {
+                console.log(`Print out entire object: ${JSON.stringify(s3Object)}`);
+                return s3Object;
+            })
+            .filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
     
         console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
         if(_.isEmpty(matchingS3Objects)){
