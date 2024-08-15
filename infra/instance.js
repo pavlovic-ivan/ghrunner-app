@@ -1,4 +1,5 @@
 const aws = require("@pulumi/aws");
+const pulumi = require("@pulumi/pulumi");
 const { getTags } = require("./commons");
 
 const createInstance = (identity, securityGroup, script, config) => {
@@ -16,6 +17,7 @@ const createInstance = (identity, securityGroup, script, config) => {
         instanceType: config.machineType,
         tags: getTags(config.repo),
         vpcSecurityGroupIds: [ securityGroup.id ],
+        availabilityZone: pulumi.output(aws.getAvailabilityZones({})).names[0], // Choose the first available AZ
         userData: Buffer.from(script).toString("base64"),
         ebsBlockDevices: [{
             deviceName: "/dev/sda1",
