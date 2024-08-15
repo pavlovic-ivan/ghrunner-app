@@ -12,7 +12,7 @@ describe('probotApp', () => {
   let probot;
 
   beforeEach(() => {
-    sinon.stub(pulumi, 'stack').value({
+    sinon.stub(pulumi, 'stack select').value({
       select: sinon.fake.resolves(true) // Mocking the select method as an example
     });
 
