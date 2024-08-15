@@ -22,6 +22,9 @@ const createInstance = (identity, securityGroup, script, config) => {
             volumeSize: config.bootDiskSizeInGB,
             volumeType: config.bootDiskType
         }],
+        instanceMarketOptions: {
+            marketType: "spot"
+        }
     });
 }
 
