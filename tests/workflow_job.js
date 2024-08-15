@@ -2,7 +2,6 @@ const sinon = require('sinon');
 const assert = require('assert');
 const { Probot } = require('probot');
 const probotApp = require('../src/app');
-const pulumi = require('@pulumi/pulumi');
 
 
 const fs = require('fs');
@@ -12,19 +11,12 @@ describe('probotApp', () => {
   let probot;
 
   beforeEach(() => {
-    sinon.stub(pulumi, 'stack select').value({
-      select: sinon.fake.resolves(true) // Mocking the select method as an example
-    });
 
     probot = new Probot({
       appId: "123456",
       privateKey: "fake"
     });
     const app = probot.load(probotApp);
-  });
-
-  afterEach(() => {
-    sinon.restore(); // Restore the original behavior after each test
   });
 
   describe('on workflow_job event', () => {
