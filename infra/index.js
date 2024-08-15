@@ -46,7 +46,7 @@ const createOrDelete = async (context, action, stackName, config) => {
     const stack = await LocalWorkspace.createOrSelectStack(args);
 
     console.log('Installing plugin');
-    await stack.workspace.installPlugin("aws", "v4.0.0");
+    await stack.workspace.installPlugin("aws", "v6.0.2");
     
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
 
