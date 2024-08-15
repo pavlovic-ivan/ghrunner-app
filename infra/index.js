@@ -5,7 +5,7 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
-const AWS = require('aws-sdk');
+const { AWS } = require('aws-sdk');
 const s3 = new AWS.S3();
 const _ = require('lodash');
 
