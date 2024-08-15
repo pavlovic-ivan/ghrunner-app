@@ -7,3 +7,4 @@ ghrunner-app.json
 .aws-sam
 dist
 config.yml
+.idea

@@ -134,7 +134,12 @@ const executeCleanup = async (app) => {
             return;
         }
 
-        await Promise.all(stacksToDelete.map(stack => handleStack(stack)));
+        // await Promise.all(stacksToDelete.map(stack => handleStack(stack)));
+
+        for (const stack of stacksToDelete) {
+            await handleStack(stack);
+        }
+
         console.log('Executing cleanup done');
     } catch (err) {
         console.log(`Error occured while executing cleanup. Error: ${err}`);
