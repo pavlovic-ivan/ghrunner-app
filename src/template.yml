@@ -159,4 +159,6 @@ Resources:
       ComparisonOperator: "GreaterThanOrEqualToThreshold"
       AlarmActions:
         - !Ref AlarmNotificationTopic  # Reference the SNS topic created above
+      OKActions:
+        - !Ref AlarmNotificationTopic  # Reference the SNS topic created above
       TreatMissingData: "notBreaching"
