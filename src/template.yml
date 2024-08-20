@@ -150,7 +150,7 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmDescription: "Alarm if there are errors in Lambda logs"
-      Namespace: "YourLambdaNamespace"  # Same as in the metric filter
+      Namespace: "LambdaErrors"  # Same as in the metric filter
       MetricName: "LambdaErrorCount"
       Statistic: "Sum"
       Period: "300"  # 5 minutes
