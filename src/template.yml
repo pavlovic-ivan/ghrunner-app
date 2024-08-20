@@ -39,6 +39,9 @@ Parameters:
   remoteStateFileCleanupScheduleExpression:
     Description: Expression for the remote state files cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
     Type: String
+  notificationEmail:
+    Description: Email address to receive CloudWatch alarm notifications
+    Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -110,3 +113,50 @@ Resources:
         DNSName: !GetAtt CustomDomainName.RegionalDomainName
         HostedZoneId: !GetAtt CustomDomainName.RegionalHostedZoneId
       Type: A
+
+  # CloudWatch Log Group for Lambda function logs
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${functionName}"
+
+  # CloudWatch Logs Metric Filter for Lambda Errors
+  LambdaErrorMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref LambdaLogGroup
+      FilterPattern: '"ERROR:"'  # This pattern matches any log containing "ERROR:"
+      MetricTransformations:
+        - MetricValue: "1"
+          MetricNamespace: "LambdaErrors"  # Replace with a suitable namespace
+          MetricName: "LambdaErrorCount"
+
+  # SNS Topic for CloudWatch Alarm notifications
+  AlarmNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: "Lambda Error Notifications"
+
+  # SNS Subscription for email notifications
+  AlarmNotificationSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AlarmNotificationTopic
+      Protocol: email
+      Endpoint: !Ref notificationEmail
+
+  # CloudWatch Alarm for Lambda Errors
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Alarm if there are errors in Lambda logs"
+      Namespace: "YourLambdaNamespace"  # Same as in the metric filter
+      MetricName: "LambdaErrorCount"
+      Statistic: "Sum"
+      Period: "300"  # 5 minutes
+      EvaluationPeriods: "1"
+      Threshold: "1"  # Alarm will trigger if 1 or more errors occur
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      AlarmActions:
+        - !Ref AlarmNotificationTopic  # Reference the SNS topic created above
+      TreatMissingData: "notBreaching"
