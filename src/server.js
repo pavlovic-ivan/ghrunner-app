@@ -22,12 +22,12 @@ exports.handler = async function (event, context) {
         if(_.has(event, "type") && _.isEqual(event.type, "scheduler")){
             const app = new App({ appId, privateKey });
             if(_.eq(event.name, "SchedulerRemoveRemoteStateFiles") && _.isEqual(event.enabled, true)){
-                console.log('Running SchedulerRemoveRemoteStateFiles scheduler...');
+                console.info('Running SchedulerRemoveRemoteStateFiles scheduler...');
                 await cleanupRemoteStateFiles();
             } else if(_.eq(event.name, "SchedulerRogueInstanceCleanup") && _.isEqual(event.enabled, true)){
                 await executeCleanup(app);
             } else {
-                console.log(`Unknown scheduler, or scheduler [${event.name}] is disabled`);
+                console.info(`Unknown scheduler, or scheduler [${event.name}] is disabled`);
             }
         } else {
             probot = new Probot({ appId, privateKey, secret });
@@ -50,7 +50,7 @@ exports.handler = async function (event, context) {
             body: "Lambda function executed",
         };
     } catch (err) {
-        console.error(err);
+        console.error(`ERROR: ${err}`);
         return {
             statusCode: 500,
             body: "Internal server error",

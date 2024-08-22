@@ -15,11 +15,11 @@ const probotApp = async (app) => {
 
       if(configPerLabel.hasOwnProperty(labels)){
         console.info(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}]. Message=Received workflow job is a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
-        console.log(`Received event from job: ${context.payload.workflow_job.id}. Action: ${context.payload.action}. Name: ${context.payload.workflow_job.name}`);
+        console.info(`Received event from job: ${context.payload.workflow_job.id}. Action: ${context.payload.action}. Name: ${context.payload.workflow_job.name}`);
         var action = context.payload.action === 'completed' ? context.payload.action : (context.payload.action === 'queued' ? "requested": null);
         
         if(action !== null){
-          console.log(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
+          console.info(`Job: ${context.payload.workflow_job.id}. Action: ${action}. Name: ${context.payload.workflow_job.name}. Run id: ${context.payload.workflow_job.run_id.toString()}. Run attempt: ${context.payload.workflow_job.run_attempt.toString()}. Labels: ${labels}`);
 
           try {
             let stack_name; 
@@ -42,7 +42,7 @@ const probotApp = async (app) => {
 
             await createOrDelete(context, action, stack_name, config);
           } catch (error) {
-            console.log(`Error occured while trying to destroy/create infrastructure. Error: ${error}`);
+            console.error(`Error occured while trying to destroy/create infrastructure. ERROR: ${error}`);
           }
         }
       }else {

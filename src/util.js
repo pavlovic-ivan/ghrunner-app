@@ -6,7 +6,7 @@ function convertYamlToJson(yamlFilePath) {
         const fileContents = fs.readFileSync(yamlFilePath, 'utf8');
         return yaml.load(fileContents);
     } catch (e) {
-        console.error('Error reading or parsing YAML:', e);
+        console.error('Error reading or parsing YAML. ERROR: ', e);
         throw e;
     }
 }
