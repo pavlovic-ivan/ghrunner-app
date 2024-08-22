@@ -5,8 +5,6 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
-// const { AWS } = require('aws-sdk');
-// const { S3 } = require('aws-sdk/clients/s3');
 const { S3Client, ListObjectsV2Command, DeleteObjectsCommand } = require("@aws-sdk/client-s3");
 const _ = require('lodash');
 
@@ -135,8 +133,6 @@ const executeCleanup = async (app) => {
             return;
         }
 
-        // await Promise.all(stacksToDelete.map(stack => handleStack(stack)));
-
         for (const stack of stacksToDelete) {
             await handleStack(stack);
         }
@@ -171,7 +167,6 @@ async function removeStateFiles(){
 
     while(proceed){
         const s3Objects = await client.send(new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken || undefined}));
-        // const s3Objects = await S3.listObjectsV2({Bucket: bucket, ContinuationToken: continuationToken || undefined}).promise();
         proceed = s3Objects.IsTruncated;
         continuationToken = s3Objects.NextContinuationToken;
 
@@ -198,10 +193,9 @@ async function removeStateFiles(){
         matchingS3Objects.forEach(matchingS3Object => {
            params.Delete.Objects.push({ Key: matchingS3Object.Key });
         });
-    
-        // const deleteObjectsResult = await S3.deleteObjects(params).promise();
+
         const deleteObjectsResult = await client.send(new DeleteObjectsCommand(params));
-        if(deleteObjectsResult.Errors.length > 0){
+        if(deleteObjectsResult.Errors !== undefined && deleteObjectsResult.Errors.length > 0){
             console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
         } else {
             deleteObjectsResult.Deleted.forEach(deletedObject => console.log(`Deleted object: ${deletedObject.Key}`));
