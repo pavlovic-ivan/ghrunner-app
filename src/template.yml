@@ -125,7 +125,7 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       LogGroupName: !Ref LambdaLogGroup
-      FilterPattern: '"ERROR:"'  # This pattern matches any log containing "ERROR:"
+      FilterPattern: '"ERROR"'  # This pattern matches any log containing "ERROR:"
       MetricTransformations:
         - MetricValue: "1"
           MetricNamespace: "LambdaErrors"  # Replace with a suitable namespace
