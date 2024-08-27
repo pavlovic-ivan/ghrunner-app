@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/nodejs:16
+FROM public.ecr.aws/lambda/nodejs:20
 
 ARG PULUMI_VERSION=3.61.0
 RUN yum install tar gzip -y \
