@@ -4,9 +4,7 @@ timestamp=$(shell date +%Y%m%d%H%M%S)
 
 prepare:
 	cd src; \
-	jinja2 jinja-template.j2 -D NOTIFICATION_EMAIL="${NOTIFICATION_EMAIL}" -o template.yml; \
-	echo "Displaying generated template.yml"; \
-	cat template.yml
+	jinja2 jinja-template.j2 -D NOTIFICATION_EMAIL="${NOTIFICATION_EMAIL}" -o template.yml
 
 build: prepare
 	cd src; \
