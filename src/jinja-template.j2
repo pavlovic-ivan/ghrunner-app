@@ -39,9 +39,6 @@ Parameters:
   remoteStateFileCleanupScheduleExpression:
     Description: Expression for the remote state files cleanup scheduler. Expression as defined in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-scheduler-schedule.html#cfn-scheduler-schedule-scheduleexpression
     Type: String
-  notificationEmail:
-    Description: Email address to receive CloudWatch alarm notifications
-    Type: String
 
 Resources:
   GHAppWebhookConsumerLambda:
@@ -138,12 +135,16 @@ Resources:
       DisplayName: "Lambda Error Notifications"
 
   # SNS Subscription for email notifications
-  AlarmNotificationSubscription:
+{% set notification_email = NOTIFICATION_EMAIL | default('') %}
+{% set emails = notification_email.split(',') %}
+{% for email in emails if email | trim %}
+  SNSSubscription_{{ email | trim | replace('@', '') | replace('.', '') }}:
     Type: AWS::SNS::Subscription
     Properties:
       TopicArn: !Ref AlarmNotificationTopic
       Protocol: email
-      Endpoint: !Ref notificationEmail
+      Endpoint: "{{ email | trim }}"
+{% endfor %}
 
   # CloudWatch Alarm for Lambda Errors
   LambdaErrorAlarm:
