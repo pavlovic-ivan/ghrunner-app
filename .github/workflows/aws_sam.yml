@@ -74,8 +74,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install jinja2
+          apt install -y python3-pip
+          pip3 install jinja2-cli
       
       - name: Deploy to AWS Lambda
         env:
