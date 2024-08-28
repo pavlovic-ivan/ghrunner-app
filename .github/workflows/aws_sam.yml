@@ -67,15 +67,8 @@ jobs:
 
       - uses: aws-actions/setup-sam@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
       - name: Install dependencies
-        run: |
-          apt install -y python3-pip
-          pip3 install jinja2-cli
+        run: pip3 install jinja2-cli
       
       - name: Deploy to AWS Lambda
         env:
