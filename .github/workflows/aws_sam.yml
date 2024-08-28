@@ -91,4 +91,4 @@ jobs:
           ROGUE_INSTANCE_CLEANUP_SCHEDULE: ${{ vars.ROGUE_INSTANCE_CLEANUP_SCHEDULE }}
           REMOTE_STATE_FILES_CLEANUP_SCHEDULE: ${{ vars.REMOTE_STATE_FILES_CLEANUP_SCHEDULE }}
           NOTIFICATION_EMAIL: ${{ vars.NOTIFICATION_EMAIL }}
-        run: make up
+        run: make build
