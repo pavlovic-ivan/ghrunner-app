@@ -9,6 +9,7 @@ prepare:
 	cat template.yml
 
 build: prepare
+	cd src; \
 	sam build
 
 up: build
