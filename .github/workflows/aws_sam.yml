@@ -67,7 +67,7 @@ jobs:
 
       - uses: aws-actions/setup-sam@v2
 
-      - name: Install dependencies
+      - name: Install jinja2-cli
         run: pip3 install jinja2-cli
       
       - name: Deploy to AWS Lambda
