@@ -138,7 +138,7 @@ Resources:
 {% set notification_email = NOTIFICATION_EMAIL | default('') %}
 {% set emails = notification_email.split(',') %}
 {% for email in emails if email | trim %}
-  SNSSubscription_{{ email | trim | replace('@', '') | replace('.', '') }}:
+  SNSSubscription{{ loop.index }}:
     Type: AWS::SNS::Subscription
     Properties:
       TopicArn: !Ref AlarmNotificationTopic
