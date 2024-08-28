@@ -45,9 +45,8 @@ const probotApp = async (app) => {
             console.error(`Error occured while trying to destroy/create infrastructure. ERROR: ${error}`);
           }
         }
-      }else {
+      } else {
         console.debug(`CtxID=[${context.id}]. JobID=[${context.payload.workflow_job.id}]. Labels=[${labels}]. Message=Received workflow job is not a candidate for self hosted runners. JobUrl=[${context.payload.workflow_job.url}]`);
-        console.error('ERROR: just testing');
       }
     }
   });
