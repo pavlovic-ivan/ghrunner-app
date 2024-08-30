@@ -118,7 +118,7 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${GHAppWebhookConsumerLambda}"
 
   # CloudWatch Logs Metric Filter for Lambda Errors
-  LambdaErrorMetricFilter:
+  LambdaErrorMetricFilter1:
     Type: AWS::Logs::MetricFilter
     Properties:
       LogGroupName: !Ref LambdaLogGroup
@@ -126,7 +126,17 @@ Resources:
       MetricTransformations:
         - MetricValue: "1"
           MetricNamespace: "LambdaErrors"  # Replace with a suitable namespace
-          MetricName: "LambdaErrorCount"
+          MetricName: "LambdaErrorCountA"
+
+  LambdaErrorMetricFilter2:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref LambdaLogGroup
+      FilterPattern: '"Error"'  # This pattern matches any log containing "Error:"
+      MetricTransformations:
+        - MetricValue: "1"
+          MetricNamespace: "LambdaErrors"  # Replace with a suitable namespace
+          MetricName: "LambdaErrorCountB"
 
   # SNS Topic for CloudWatch Alarm notifications
   AlarmNotificationTopic:
