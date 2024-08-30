@@ -47,7 +47,7 @@ Resources:
       FunctionName: !Join [ "-", [ !Ref functionName, !Ref timestamp ] ]
       Description: Basic Auth Funtion
       Role: !Ref awsRole
-      MemorySize: 512
+      MemorySize: 128
       EphemeralStorage:
         Size: 10240
       Timeout: 900
