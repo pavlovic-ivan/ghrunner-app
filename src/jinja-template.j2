@@ -78,6 +78,7 @@ Resources:
           DEPLOYMENT_TIMESTAMP: !Ref timestamp
           MAX_STACK_AGE_IN_MINUTES: !Ref maxStackAgeInMinutes
           MAX_STATE_FILE_AGE_IN_MINUTES: !Ref maxStateFileAgeInMinutes
+          NODE_NO_WARNINGS: 1
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi
