@@ -8,3 +8,4 @@ ghrunner-app.json
 dist
 config.yml
 .idea
+src/template.yml

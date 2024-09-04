@@ -66,6 +66,9 @@ jobs:
           docker push $ECR_REPO/ghrunner-app:latest
 
       - uses: aws-actions/setup-sam@v2
+
+      - name: Install jinja2-cli
+        run: pip3 install jinja2-cli
       
       - name: Deploy to AWS Lambda
         env:
@@ -80,4 +83,5 @@ jobs:
           MAX_STATE_FILE_AGE_IN_MINUTES: ${{ vars.MAX_STATE_FILE_AGE_IN_MINUTES }}
           ROGUE_INSTANCE_CLEANUP_SCHEDULE: ${{ vars.ROGUE_INSTANCE_CLEANUP_SCHEDULE }}
           REMOTE_STATE_FILES_CLEANUP_SCHEDULE: ${{ vars.REMOTE_STATE_FILES_CLEANUP_SCHEDULE }}
+          NOTIFICATION_EMAIL: ${{ vars.NOTIFICATION_EMAIL }}
         run: make up

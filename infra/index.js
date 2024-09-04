@@ -5,8 +5,6 @@ const { createSecurityGroup } = require("./security-group");
 const { createInstance } = require("./instance");
 const { createStartupScript } = require("./startup-script");
 const { fetchToken } = require("./token-fetcher");
-// const { AWS } = require('aws-sdk');
-// const { S3 } = require('aws-sdk/clients/s3');
 const { S3Client, ListObjectsV2Command, DeleteObjectsCommand } = require("@aws-sdk/client-s3");
 const _ = require('lodash');
 
@@ -16,29 +14,29 @@ const MAX_STACK_AGE_IN_MILLIS = (process.env.MAX_STACK_AGE_IN_MINUTES * 60 * 100
 const MAX_STATE_FILE_AGE_IN_MILLIS = (process.env.MAX_STATE_FILE_AGE_IN_MINUTES * 60 * 1000)
 
 const createOrDelete = async (context, action, stackName, config) => {
-    console.log('About to create/delete infra');
+    console.info('About to create/delete infra');
 
     const pulumiProgram = async () => {
-        console.log('fetching token');
+        console.info('fetching token');
         const token = await fetchToken(context, config.owner, config.repo);
 
-        console.log('creating startup script');
+        console.info('creating startup script');
         const script = createStartupScript(stackName, config, token);
 
-        console.log('getting caller identity');
+        console.info('getting caller identity');
         const identity = await aws.getCallerIdentity({});
 
-        console.log('creating security grouo');
+        console.info('creating security grouo');
         const securityGroup = createSecurityGroup(config.repo);
 
-        console.log('creating instance');
+        console.info('creating instance');
         const runnerInstance = createInstance(identity, securityGroup, script, config);
         return {
             instanceArn: runnerInstance.arn
         };
     };
 
-    console.log('Create/select stack');
+    console.info('Create/select stack');
     const args = {
         stackName: stackName,
         projectName: `${config.repo}`,
@@ -46,7 +44,7 @@ const createOrDelete = async (context, action, stackName, config) => {
     };
     const stack = await LocalWorkspace.createOrSelectStack(args);
 
-    console.log('Installing plugin');
+    console.info('Installing plugin');
     await stack.workspace.installPlugin("aws", "v6.0.2");
     
     await stack.setConfig("aws:region", { value: process.env.AWS_REGION });
@@ -74,13 +72,13 @@ async function retryRefresh(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
             return;
         } catch (err) {
             if (i < maxRetries - 1) {
-                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
-                console.log(`Error is: ${err}`);
+                console.error(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                console.error(`ERROR: ${err}`);
                 await stack.cancel();
-                console.log("Action cancelled");
+                console.error("Action cancelled");
                 await new Promise(resolve => setTimeout(resolve, interval));
             } else {
-                throw new Error(`Action failed after ${maxRetries} attempts! Error: ${err}`);
+                throw new Error(`Action failed after ${maxRetries} attempts! ERROR: ${err}`);
             }
         }
     }
@@ -93,13 +91,13 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
             return;
         } catch (err) {
             if (i < maxRetries - 1) {
-                console.log(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
-                console.log(`Error is: ${err}`);
+                console.error(`Attempt ${i+1} failed. Retrying in ${interval}ms...`);
+                console.error(`ERROR: ${err}`);
                 await stack.cancel();
-                console.log("Action cancelled");
+                console.error("Action cancelled");
                 await new Promise(resolve => setTimeout(resolve, interval));
             } else {
-                throw new Error(`Action failed after ${maxRetries} attempts! Error: ${err}`);
+                throw new Error(`Action failed after ${maxRetries} attempts! ERROR: ${err}`);
             }
         }
     }
@@ -107,12 +105,12 @@ async function retryDestroy(stack, maxRetries = RETRY_MAX, interval = RETRY_INTE
 
 const cleanupRemoteStateFiles = async () => {
     await removeStateFiles();
-    console.log('Removing state files done');
+    console.info('Removing state files done');
 }
 
 const executeCleanup = async (app) => {
     try {
-        console.log('Executing cleanup');
+        console.info('Executing cleanup');
         const registeredRunners = await getRegisteredRunners(app);
 
         const ws = await LocalWorkspace.create({
@@ -131,25 +129,23 @@ const executeCleanup = async (app) => {
         const stacksToDelete = (await ws.listStacks()).filter(stack => shouldDeleteStack(stack, registeredRunners));
         
         if(stacksToDelete.length === 0){
-            console.log('Nothing to delete. Skipping...');
+            console.info('Nothing to delete. Skipping...');
             return;
         }
-
-        // await Promise.all(stacksToDelete.map(stack => handleStack(stack)));
 
         for (const stack of stacksToDelete) {
             await handleStack(stack);
         }
 
-        console.log('Executing cleanup done');
+        console.info('Executing cleanup done');
     } catch (err) {
-        console.log(`Error occured while executing cleanup. Error: ${err}`);
+        console.error(`Error occured while executing cleanup. ERROR: ${err}`);
     }
 }
 
 async function handleStack(stack){
     const organisedStackName = getOrganisedStackName(stack);
-    console.log(`Stack [${stack.name}] is more than ${process.env.MAX_STACK_AGE_IN_MINUTES} minutes old. Deleting the stack now`);
+    console.info(`Stack [${stack.name}] is more than ${process.env.MAX_STACK_AGE_IN_MINUTES} minutes old. Deleting the stack now`);
     try {
         const selectedStack = await LocalWorkspace.selectStack({
             stackName: stack.name,
@@ -157,9 +153,9 @@ async function handleStack(stack){
             program: async () => {}
         });
         await retryDestroy(selectedStack);
-        console.log(`Stack [${stack.name}] deleted`);
+        console.info(`Stack [${stack.name}] deleted`);
     } catch(err){
-        console.log(`Error occured while selecting a stack. Error: ${err}`);
+        console.error(`Error occured while selecting a stack. ERROR: ${err}`);
     }
 }
 
@@ -171,23 +167,18 @@ async function removeStateFiles(){
 
     while(proceed){
         const s3Objects = await client.send(new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken || undefined}));
-        // const s3Objects = await S3.listObjectsV2({Bucket: bucket, ContinuationToken: continuationToken || undefined}).promise();
         proceed = s3Objects.IsTruncated;
         continuationToken = s3Objects.NextContinuationToken;
 
-        const matchingS3Objects = s3Objects.Contents.map(s3Object => {
-                console.log(`Print out entire object: ${JSON.stringify(s3Object)}`);
-                return s3Object;
-            })
-            .filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
+        const matchingS3Objects = s3Objects.Contents.filter(s3Object => objectIsNotPulumiMeta(s3Object) && objectIsNotLockFile(s3Object) && isDateOlderThan(s3Object.LastModified, MAX_STATE_FILE_AGE_IN_MILLIS));
     
-        console.log(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
+        console.info(`Fetched [${matchingS3Objects.length}] S3 objects to delete`);
         if(_.isEmpty(matchingS3Objects)){
-            console.log('No matching objects. Skipping this turn...');
+            console.info('No matching objects. Skipping this turn...');
             continue;
         }
     
-        var params = {
+        let params = {
             Bucket: bucket, 
             Delete: {
                 Objects: [], 
@@ -198,14 +189,13 @@ async function removeStateFiles(){
         matchingS3Objects.forEach(matchingS3Object => {
            params.Delete.Objects.push({ Key: matchingS3Object.Key });
         });
-    
-        // const deleteObjectsResult = await S3.deleteObjects(params).promise();
+
         const deleteObjectsResult = await client.send(new DeleteObjectsCommand(params));
-        if(deleteObjectsResult.Errors.length > 0){
-            console.log(`Failed to delete S3 objects: ${JSON.stringify(deleteObjectsResult.Errors)}`);
+        if(deleteObjectsResult.Errors !== undefined && deleteObjectsResult.Errors.length > 0){
+            console.error(`ERROR: Failed to delete S3 objects. ${JSON.stringify(deleteObjectsResult.Errors)}`);
         } else {
             deleteObjectsResult.Deleted.forEach(deletedObject => console.log(`Deleted object: ${deletedObject.Key}`));
-            console.log(`Successfully deleted S3 objects`);
+            console.info(`Successfully deleted S3 objects`);
         }
     }
 }

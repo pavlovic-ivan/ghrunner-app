@@ -2,7 +2,11 @@ SHELL:=/bin/bash
 function_name=ghrunner-app
 timestamp=$(shell date +%Y%m%d%H%M%S)
 
-build:
+prepare:
+	cd src; \
+	jinja2 jinja-template.j2 -D NOTIFICATION_EMAIL="${NOTIFICATION_EMAIL}" -o template.yml
+
+build: prepare
 	cd src; \
 	sam build
 

@@ -78,6 +78,7 @@ Resources:
           DEPLOYMENT_TIMESTAMP: !Ref timestamp
           MAX_STACK_AGE_IN_MINUTES: !Ref maxStackAgeInMinutes
           MAX_STATE_FILE_AGE_IN_MINUTES: !Ref maxStateFileAgeInMinutes
+          NODE_NO_WARNINGS: 1
   
   HttpApiGateway:
     Type: AWS::Serverless::HttpApi
@@ -110,3 +111,56 @@ Resources:
         DNSName: !GetAtt CustomDomainName.RegionalDomainName
         HostedZoneId: !GetAtt CustomDomainName.RegionalHostedZoneId
       Type: A
+
+  # CloudWatch Log Group for Lambda function logs
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GHAppWebhookConsumerLambda}"
+
+  # CloudWatch Logs Metric Filter for Lambda Errors
+  LambdaErrorMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref LambdaLogGroup
+      FilterPattern: '?ERROR ?error ?Error'  # This pattern matches any log containing "ERROR:"
+      MetricTransformations:
+        - MetricValue: "1"
+          MetricNamespace: "LambdaErrors"  # Replace with a suitable namespace
+          MetricName: "LambdaErrorCount"
+
+  # SNS Topic for CloudWatch Alarm notifications
+  AlarmNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: "Lambda Error Notifications"
+
+  # SNS Subscription for email notifications
+{% set notification_email = NOTIFICATION_EMAIL | default('') %}
+{% set emails = notification_email.split(',') %}
+{% for email in emails if email | trim %}
+  SNSSubscription{{ loop.index }}:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AlarmNotificationTopic
+      Protocol: email
+      Endpoint: "{{ email | trim }}"
+{% endfor %}
+
+  # CloudWatch Alarm for Lambda Errors
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Alarm if there are errors in Lambda logs"
+      Namespace: "LambdaErrors"  # Same as in the metric filter
+      MetricName: "LambdaErrorCount"
+      Statistic: "Sum"
+      Period: "300"  # 5 minutes
+      EvaluationPeriods: "1"
+      Threshold: "1"  # Alarm will trigger if 1 or more errors occur
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      AlarmActions:
+        - !Ref AlarmNotificationTopic  # Reference the SNS topic created above
+      OKActions:
+        - !Ref AlarmNotificationTopic  # Reference the SNS topic created above
+      TreatMissingData: "notBreaching"

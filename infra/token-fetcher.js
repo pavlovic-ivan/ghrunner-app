@@ -4,7 +4,7 @@ const fetchToken = async (context, owner, repo) => {
         const registrationToken = response.data.token;
         return registrationToken;
       } catch (error) {
-        console.error('Error while getting registration token:', error.message);
+        console.error('Error while getting registration token. ERROR:', error.message);
         throw Error(error.message);
       }
 }
