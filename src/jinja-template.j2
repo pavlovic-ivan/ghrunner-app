@@ -119,7 +119,7 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${GHAppWebhookConsumerLambda}"
 
   # CloudWatch Logs Metric Filter for Lambda Errors
-  LambdaErrorMetricFilter1:
+  LambdaErrorMetricFilter:
     Type: AWS::Logs::MetricFilter
     Properties:
       LogGroupName: !Ref LambdaLogGroup
